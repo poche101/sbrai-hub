@@ -35,7 +35,7 @@ Route::get('listings', [DashboardController::class, 'listings'])->name('listings
 
     // KYC Management
     Route::get('kyc-requests', [DashboardController::class, 'kycRequests'])->name('kyc.index');
-    Route::post('kyc/{id}/approve', [DashboardController::class, 'approveKyc'])->name('kyc.approve');
+    Route::post('kyc/{user}/approve', [DashboardController::class, 'approveKyc'])->name('kyc.approve');
     Route::post('kyc/{id}/reject', [DashboardController::class, 'rejectKyc'])->name('kyc.reject');
 
     // User Management

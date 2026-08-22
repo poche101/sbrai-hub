@@ -51,4 +51,9 @@ return [
     'webhook_secret' => env('ESPEES_WEBHOOK_SECRET'),
 ],
 
+'termii' => [
+    'api_key'   => env('TERMII_API_KEY'),
+    'sender_id' => env('TERMII_SENDER_ID', 'Sbrai'),
+],
+
 ];

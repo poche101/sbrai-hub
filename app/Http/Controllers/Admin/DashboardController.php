@@ -185,21 +185,32 @@ class DashboardController extends Controller
         return view('admin.kyc-requests', compact('pending'));
     }
 
-    public function approveKyc(Request $request, string $id)
-    {
-        $user = User::findOrFail($id);
-        $user->update(['kyc_status' => 'verified']);
+  public function approveKyc(Request $request, User $user)
+{
+    // Block approval if the upload counts do not meet the role requirements
+    if (!$user->hasUploadedAllKycDocuments()) {
+        $uploaded = is_array($user->kyc_documents) ? count(array_filter($user->kyc_documents)) : 0;
+        $expected = $user->getExpectedKycCount();
 
-        if ($user->cac_number) {
-            $user->update(['is_verified' => true]);
-        }
-
-        \App\Services\NotificationService::sendPush(
-            $user, 'KYC Approved ✅', 'Your identity verification has been approved.'
+        return redirect()->back()->with(
+            'error',
+            "Incomplete submission. User uploaded {$uploaded} of {$expected} required documents."
         );
-
-        return back()->with('success', "KYC approved for {$user->full_name}");
     }
+
+    $user->update([
+        'kyc_status' => 'verified',
+        'is_verified' => true,
+    ]);
+
+    \App\Services\NotificationService::sendPush(
+        $user,
+        'KYC Approved ✅',
+        'Your identity verification has been approved.'
+    );
+
+    return redirect()->back()->with('success', 'KYC approved successfully.');
+}
 
     public function rejectKyc(Request $request, string $id)
     {

@@ -2253,7 +2253,7 @@ namespace App\Models {
      * @property float $amount
      * @property string $type
      * @property string $user_id
-     * @property int $id
+     * @property string $id
      * @property-read \App\Models\User $user
      * @method static \Illuminate\Database\Eloquent\Builder<Transaction>|Transaction whereId($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Transaction>|Transaction whereUserId($value)

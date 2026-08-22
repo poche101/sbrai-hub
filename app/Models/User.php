@@ -87,4 +87,30 @@ class User extends Authenticatable
                     ->where('end_date', '>', now())
                     ->exists();
     }
+
+    /**
+     * Calculate the expected count based on the account role.
+     */
+    public function getExpectedKycCount(): int
+    {
+        return $this->role === 'vendor' ? 4 : 3;
+    }
+
+    /**
+     * Check if the specific required fields are present.
+     */
+    public function hasUploadedAllKycDocuments(): bool
+    {
+        // 1. Core items required by BOTH roles
+        if (empty($this->email) || empty($this->phone) || empty($this->identity_number)) {
+            return false;
+        }
+
+        // 2. Additional validation requirement for vendors
+        if ($this->role === 'vendor' && empty($this->cac_number)) {
+            return false;
+        }
+
+        return true;
+    }
 }
