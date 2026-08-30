@@ -46,6 +46,15 @@ Route::get('listings/trending',     [ListingController::class, 'trending']);
 Route::get('listings/recommended',  [ListingController::class, 'recommended']);
 Route::get('listings/{id}',         [ListingController::class, 'show']);
 
+// Public translation — deliberately outside auth:sanctum. Translating UI
+// text isn't sensitive, and guests browsing before signing up are exactly
+// who benefits most from a translated homepage/browse page.
+Route::prefix('translate')->group(function () {
+    Route::post('/',                    [TranslationController::class, 'translate']);
+    Route::post('batch',                [TranslationController::class, 'translateBatch']);
+    Route::post('listing/{listingId}',  [TranslationController::class, 'translateListing']);
+});
+
 // ── Protected Routes (Sanctum Auth Required) ─────────────────────────────
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -117,7 +126,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('paystack/verify',          [SubscriptionController::class, 'handlePaystackCallback']);
 
         // Espees Gateway
-        Route::post('espees/pay',               [SubscriptionController::class, 'payWithEspees']);
+        Route::get('espees/checkout',           [SubscriptionController::class, 'espeesCheckout']);
+        Route::post('espees/verify',            [SubscriptionController::class, 'espeesVerify']);
     });
 
     // ─── Notifications
@@ -148,13 +158,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('token',      [CallingController::class, 'generateToken']);
         Route::post('initiate',   [CallingController::class, 'initiateCall']);
         Route::post('end',        [CallingController::class, 'endCall']);
-    });
-
-    // ─── Translation (Google Translate)
-    Route::prefix('translate')->group(function () {
-        Route::post('/',                    [TranslationController::class, 'translate']);
-        Route::post('batch',                [TranslationController::class, 'translateBatch']);
-        Route::post('listing/{listingId}',  [TranslationController::class, 'translateListing']);
     });
 });
 

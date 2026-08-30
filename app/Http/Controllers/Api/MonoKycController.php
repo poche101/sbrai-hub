@@ -128,7 +128,6 @@ class MonoKycController extends Controller
         $result = $this->mono->verifyCac($request->cac_number);
 
         if ($result['success']) {
-            // Give vendor the verified badge
             $request->user()->update([
                 'cac_number'  => $request->cac_number,
                 'is_verified' => true,
@@ -149,56 +148,117 @@ class MonoKycController extends Controller
     {
         $user = $request->user();
         return response()->json([
-            'success'          => true,
-            'status'           => $user->kyc_status,
-            'email_verified'   => $user->email_verified_at !== null,
-            'phone_verified'   => $user->phone_verified_at !== null,
-            'identity_verified'=> $user->identity_verified_at !== null,
-            'is_verified'      => $user->is_verified,
-            'progress'         => $this->calcProgress($user),
-            'rejection_reason' => $user->kyc_rejection_reason,
+            'success'           => true,
+            'status'            => $user->kyc_status,
+            'email_verified'    => $user->email_verified_at !== null,
+            'phone_verified'    => $user->phone_verified_at !== null,
+            'identity_verified' => $user->identity_verified_at !== null,
+            'is_verified'       => $user->is_verified,
+            'progress'          => $this->calcProgress($user),
+            'rejection_reason'  => $user->kyc_rejection_reason,
         ]);
     }
 
     // ─── Email OTP (Termii/Mailgun) ───────────────────────────────────
     public function sendEmailOtp(Request $request): JsonResponse
     {
-        $user = $request->user();
-        $otp  = OtpService::generate($user->email, 'email_verify');
-        OtpService::sendEmail($user->email, $otp, $user->full_name);
-        return response()->json(['success' => true, 'message' => 'OTP sent to ' . $user->email]);
+        $request->validate(['email' => 'nullable|email']);
+
+        $user  = $request->user();
+        $email = $request->input('email') ?? $user?->email;
+
+        if (!$email) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An email address is required to send an OTP.'
+            ], 422);
+        }
+
+        $otp = OtpService::generate($email, 'email_verify');
+        OtpService::sendEmail($email, $otp, $user?->full_name ?? 'User');
+
+        return response()->json(['success' => true, 'message' => 'OTP sent to ' . $email]);
     }
 
     public function verifyEmail(Request $request): JsonResponse
     {
-        $request->validate(['otp' => 'required|string|digits:6']);
-        $user = $request->user();
-        if (!OtpService::verify($user->email, $request->otp, 'email_verify')) {
+        $request->validate([
+            'otp'   => 'required|string|digits:6',
+            'email' => 'nullable|email',
+        ]);
+
+        $user  = $request->user();
+        $email = $request->input('email') ?? $user?->email;
+
+        if (!$email) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An email address is required for verification.'
+            ], 422);
+        }
+
+        if (!OtpService::verify($email, $request->otp, 'email_verify')) {
             return response()->json(['success' => false, 'message' => 'Invalid or expired OTP'], 422);
         }
-        $user->update(['email_verified_at' => now()]);
-        $this->updateKycStatus($user);
+
+        if ($user) {
+            $user->update(['email_verified_at' => now()]);
+            $this->updateKycStatus($user);
+        }
+
         return response()->json(['success' => true, 'message' => 'Email verified successfully']);
     }
 
     // ─── Phone OTP (Termii SMS) ───────────────────────────────────────
     public function sendPhoneOtp(Request $request): JsonResponse
     {
-        $user = $request->user();
-        $otp  = OtpService::generate($user->phone, 'phone_verify');
-        OtpService::sendSms($user->phone, $otp);
-        return response()->json(['success' => true, 'message' => 'OTP sent to ' . $user->phone]);
+        $request->validate(['phone' => 'nullable|string|max:20']);
+
+        $user  = $request->user();
+        $phone = $request->input('phone') ?? $user?->phone;
+
+        if (!$phone) {
+            return response()->json([
+                'success' => false,
+                'message' => 'A valid phone number is required to send an OTP.'
+            ], 422);
+        }
+
+        $otp = OtpService::generate($phone, 'phone_verify');
+        OtpService::sendSms($phone, $otp);
+
+        return response()->json(['success' => true, 'message' => 'OTP sent to ' . $phone]);
     }
 
     public function verifyPhone(Request $request): JsonResponse
     {
-        $request->validate(['otp' => 'required|string|digits:6']);
-        $user = $request->user();
-        if (!OtpService::verify($user->phone, $request->otp, 'phone_verify')) {
+        $request->validate([
+            'otp'   => 'required|string|digits:6',
+            'phone' => 'nullable|string|max:20',
+        ]);
+
+        $user  = $request->user();
+        $phone = $request->input('phone') ?? $user?->phone;
+
+        if (!$phone) {
+            return response()->json([
+                'success' => false,
+                'message' => 'A phone number is required for verification.'
+            ], 422);
+        }
+
+        if (!OtpService::verify($phone, $request->otp, 'phone_verify')) {
             return response()->json(['success' => false, 'message' => 'Invalid or expired OTP'], 422);
         }
-        $user->update(['phone_verified_at' => now()]);
-        $this->updateKycStatus($user);
+
+        if ($user) {
+            $user->update([
+                'phone' => $phone,
+                'phone_verified_at' => now(),
+            ]);
+            $this->updateKycStatus($user);
+        }
+
         return response()->json(['success' => true, 'message' => 'Phone verified successfully']);
     }
 
@@ -208,11 +268,14 @@ class MonoKycController extends Controller
         $request->validate(['images.*' => 'required|file|mimes:jpg,jpeg,png,pdf|max:10240']);
         $user = $request->user();
         $urls = $user->kyc_documents ?? [];
+
         foreach ($request->file('images', []) as $file) {
             $path   = $file->store("kyc/{$user->id}", 'private');
             $urls[] = $path;
         }
+
         $user->update(['kyc_documents' => $urls]);
+
         return response()->json(['success' => true, 'message' => 'Documents uploaded successfully']);
     }
 

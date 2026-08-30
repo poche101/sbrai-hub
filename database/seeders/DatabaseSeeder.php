@@ -29,5 +29,28 @@ class DatabaseSeeder extends Seeder
             'email'     => 'test@example.com',
             'role'      => 'buyer',
         ]);
+
+        // 3. A verified, subscribed vendor so /post-ad has an account that
+        // can actually publish immediately (kyc_status + active subscription
+        // are both required by CanPostListingMiddleware).
+        $vendor = User::factory()->create([
+            'full_name'   => 'Demo Vendor',
+            'email'       => 'vendor@example.com',
+            'role'        => 'vendor',
+            'kyc_status'  => 'verified',
+            'is_verified' => true,
+        ]);
+        $vendor->subscriptions()->create([
+            'status'          => 'active',
+            'start_date'      => now(),
+            'end_date'        => now()->addYear(),
+            'amount_paid'     => 20000,
+            'payment_method'  => 'paystack',
+            'payment_gateway' => 'paystack',
+        ]);
+
+        // Categories are already seeded directly inside the
+        // create_categories_table migration (Sharp Sand, Cement, Blocks,
+        // Logistics, Apartments, etc.) — no separate seeder needed.
     }
 }

@@ -57,6 +57,7 @@ class ComposerStaticInit0de296ec1b3b27de76b9aabb3e7907c9
             'TijsVerkoyen\\CssToInlineStyles\\' => 31,
             'Tests\\' => 6,
             'Termwind\\' => 9,
+            'TaylanUnutmaz\\AgoraTokenBuilder\\' => 32,
         ),
         'S' => 
         array (
@@ -202,6 +203,10 @@ class ComposerStaticInit0de296ec1b3b27de76b9aabb3e7907c9
         'Termwind\\' => 
         array (
             0 => __DIR__ . '/..' . '/nunomaduro/termwind/src',
+        ),
+        'TaylanUnutmaz\\AgoraTokenBuilder\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/taylanunutmaz/agora-token-builder/src',
         ),
         'Symfony\\Polyfill\\Uuid\\' => 
         array (
@@ -534,6 +539,7 @@ class ComposerStaticInit0de296ec1b3b27de76b9aabb3e7907c9
     );
 
     public static $classMap = array (
+        'App\\Console\\Commands\\ApproveKyc' => __DIR__ . '/../..' . '/app/Console/Commands/ApproveKyc.php',
         'App\\Http\\Controllers\\Admin\\AdminAuthController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/AdminAuthController.php',
         'App\\Http\\Controllers\\Admin\\CategoryController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/CategoryController.php',
         'App\\Http\\Controllers\\Admin\\DashboardController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/DashboardController.php',
@@ -548,6 +554,19 @@ class ComposerStaticInit0de296ec1b3b27de76b9aabb3e7907c9
         'App\\Http\\Controllers\\Api\\TranslationController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/TranslationController.php',
         'App\\Http\\Controllers\\Api\\VendorController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/VendorController.php',
         'App\\Http\\Controllers\\Controller' => __DIR__ . '/../..' . '/app/Http/Controllers/Controller.php',
+        'App\\Http\\Controllers\\Site\\AuthPageController' => __DIR__ . '/../..' . '/app/Http/Controllers/Site/AuthPageController.php',
+        'App\\Http\\Controllers\\Site\\BrowseController' => __DIR__ . '/../..' . '/app/Http/Controllers/Site/BrowseController.php',
+        'App\\Http\\Controllers\\Site\\FavouritesController' => __DIR__ . '/../..' . '/app/Http/Controllers/Site/FavouritesController.php',
+        'App\\Http\\Controllers\\Site\\HomeController' => __DIR__ . '/../..' . '/app/Http/Controllers/Site/HomeController.php',
+        'App\\Http\\Controllers\\Site\\KycController' => __DIR__ . '/../..' . '/app/Http/Controllers/Site/KycController.php',
+        'App\\Http\\Controllers\\Site\\ListingPageController' => __DIR__ . '/../..' . '/app/Http/Controllers/Site/ListingPageController.php',
+        'App\\Http\\Controllers\\Site\\MessagesController' => __DIR__ . '/../..' . '/app/Http/Controllers/Site/MessagesController.php',
+        'App\\Http\\Controllers\\Site\\PostAdController' => __DIR__ . '/../..' . '/app/Http/Controllers/Site/PostAdController.php',
+        'App\\Http\\Controllers\\Site\\PricingController' => __DIR__ . '/../..' . '/app/Http/Controllers/Site/PricingController.php',
+        'App\\Http\\Controllers\\Site\\PrivacyController' => __DIR__ . '/../..' . '/app/Http/Controllers/Site/PrivacyController.php',
+        'App\\Http\\Controllers\\Site\\ProfileController' => __DIR__ . '/../..' . '/app/Http/Controllers/Site/ProfileController.php',
+        'App\\Http\\Controllers\\Site\\SettingsController' => __DIR__ . '/../..' . '/app/Http/Controllers/Site/SettingsController.php',
+        'App\\Http\\Controllers\\Site\\TermsController' => __DIR__ . '/../..' . '/app/Http/Controllers/Site/TermsController.php',
         'App\\Http\\Middleware\\AdminOnlyMiddleware' => __DIR__ . '/../..' . '/app/Http/Middleware/AdminOnlyMiddleware.php',
         'App\\Http\\Middleware\\ApiThrottleMiddleware' => __DIR__ . '/../..' . '/app/Http/Middleware/ApiThrottleMiddleware.php',
         'App\\Http\\Middleware\\CanPostListingMiddleware' => __DIR__ . '/../..' . '/app/Http/Middleware/CanPostListingMiddleware.php',
@@ -7347,6 +7366,10 @@ class ComposerStaticInit0de296ec1b3b27de76b9aabb3e7907c9
         'Symfony\\Polyfill\\Php83\\Php83' => __DIR__ . '/..' . '/symfony/polyfill-php83/Php83.php',
         'Symfony\\Polyfill\\Php85\\Php85' => __DIR__ . '/..' . '/symfony/polyfill-php85/Php85.php',
         'Symfony\\Polyfill\\Uuid\\Uuid' => __DIR__ . '/..' . '/symfony/polyfill-uuid/Uuid.php',
+        'TaylanUnutmaz\\AgoraTokenBuilder\\AccessToken' => __DIR__ . '/..' . '/taylanunutmaz/agora-token-builder/src/AccessToken.php',
+        'TaylanUnutmaz\\AgoraTokenBuilder\\Message' => __DIR__ . '/..' . '/taylanunutmaz/agora-token-builder/src/Message.php',
+        'TaylanUnutmaz\\AgoraTokenBuilder\\RtcTokenBuilder' => __DIR__ . '/..' . '/taylanunutmaz/agora-token-builder/src/RtcTokenBuilder.php',
+        'TaylanUnutmaz\\AgoraTokenBuilder\\RtmTokenBuilder' => __DIR__ . '/..' . '/taylanunutmaz/agora-token-builder/src/RtmTokenBuilder.php',
         'Termwind\\Actions\\StyleToMethod' => __DIR__ . '/..' . '/nunomaduro/termwind/src/Actions/StyleToMethod.php',
         'Termwind\\Components\\Anchor' => __DIR__ . '/..' . '/nunomaduro/termwind/src/Components/Anchor.php',
         'Termwind\\Components\\BreakLine' => __DIR__ . '/..' . '/nunomaduro/termwind/src/Components/BreakLine.php',

@@ -167,31 +167,66 @@ class SubscriptionController extends Controller
     }
 
     // ─── Espees Gateway Payment ───────────────────────────────────────
-    public function payWithEspees(Request $request): JsonResponse
+    // Rebuilt against Espees' real, documented hosted-checkout flow —
+    // the previous version called a wallet+PIN debit endpoint that
+    // doesn't exist in their actual API. This now mirrors the existing
+    // Paystack pattern above: create a checkout, redirect the user to
+    // Espees' own payment portal (their PIN never touches our server),
+    // then confirm the payment server-side once they're done.
+    public function espeesCheckout(Request $request): JsonResponse
     {
-        $request->validate([
-            'wallet_id'   => 'required|string',
-            'pin'         => 'required|string|min:4|max:6',
-            'amount'      => 'required|integer|min:10',
-            'description' => 'required|string',
+        $user = $request->user();
+        $productSku = 'SBRAI-SUB-' . $user->id . '-' . now()->timestamp;
+
+        $result = $this->espees->createProduct(
+            productSku: $productSku,
+            narration: 'Sbrai Solutions — Annual Vendor Subscription',
+            price: 10,
+            successUrl: config('app.url') . '/pricing?espees=success',
+            failUrl: config('app.url') . '/pricing?espees=failed',
+            userData: ['user_id' => $user->id],
+        );
+
+        if (!$result['success']) {
+            return response()->json([
+                'success' => false,
+                'message' => $result['message'] ?? 'Could not start Espees checkout',
+            ], 502);
+        }
+
+        return response()->json([
+            'success'      => true,
+            'checkout_url' => $result['checkout_url'],
+            'payment_ref'  => $result['payment_ref'],
         ]);
+    }
+
+    public function espeesVerify(Request $request): JsonResponse
+    {
+        $request->validate(['payment_ref' => 'required|string']);
+
+        $result = $this->espees->confirmPayment($request->payment_ref);
+
+        if (!$result['success']) {
+            return response()->json([
+                'success' => false,
+                'message' => $result['message'] ?? 'Could not verify Espees payment',
+            ], 502);
+        }
+
+        if ($result['status'] !== 'APPROVED') {
+            return response()->json([
+                'success' => false,
+                'message' => match ($result['status']) {
+                    'PENDING'   => 'Payment is still processing — try again in a moment.',
+                    'DECLINE'   => 'Payment was declined.',
+                    default     => 'No payment found for that reference.',
+                },
+                'status' => $result['status'],
+            ], 422);
+        }
 
         try {
-            $result = $this->espees->debit(
-                walletId:    $request->wallet_id,
-                pin:         $request->pin,
-                amount:      $request->amount,
-                description: $request->description,
-                reference:   'SBRAI-' . uniqid(),
-            );
-
-            if (!$result['success']) {
-                return response()->json([
-                    'success' => false,
-                    'message' => $result['message'] ?? 'Espees payment failed',
-                ], 422);
-            }
-
             return DB::transaction(function () use ($request, $result) {
                 $user = $request->user();
 
@@ -204,7 +239,7 @@ class SubscriptionController extends Controller
                     'end_date'        => now()->addYear(),
                     'amount_paid'     => 10,
                     'payment_method'  => 'espees',
-                    'transaction_id'  => $result['transaction_id'],
+                    'transaction_id'  => $request->payment_ref,
                     'payment_gateway' => 'espees',
                 ]);
 
@@ -214,7 +249,7 @@ class SubscriptionController extends Controller
                     'amount'      => 10,
                     'currency'    => 'ESPEES',
                     'description' => 'Annual Subscription - Espees Gateway',
-                    'reference'   => $result['transaction_id'],
+                    'reference'   => $request->payment_ref,
                     'status'      => 'completed',
                 ]);
 
@@ -239,10 +274,10 @@ class SubscriptionController extends Controller
                     'message'      => 'Subscription activated via Espees',
                     'subscription' => $this->formatSub($subscription),
                 ]);
-        });
+            });
         } catch (\Exception $e) {
-            Log::error('Espees payment error: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Payment processing error'], 500);
+            Log::error('Espees verify error: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Processing error occurred'], 500);
         }
     }
 

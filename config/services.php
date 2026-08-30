@@ -35,6 +35,24 @@ return [
         ],
     ],
 
+'google' => [
+    'client_id'     => env('GOOGLE_CLIENT_ID'),
+    'translate_key' => env('GOOGLE_TRANSLATE_KEY'),
+],
+
+'facebook' => [
+    'app_id' => env('FACEBOOK_APP_ID'),
+],
+
+'mono' => [
+    'secret_key' => env('MONO_SECRET_KEY'),
+],
+
+'agora' => [
+    'app_id'          => env('AGORA_APP_ID'),
+    'app_certificate' => env('AGORA_APP_CERTIFICATE'),
+],
+
 'paystack' => [
     'public_key' => env('PAYSTACK_PUBLIC_KEY'),
     'secret_key' => env('PAYSTACK_SECRET_KEY'),
@@ -44,16 +62,27 @@ return [
 
 'espees' => [
     'env' => env('ESPEES_ENV', 'sandbox'),
-    'base_url' => env('ESPEES_BASE_URL'),
+    // Real API root, confirmed from developers.espees.org's own PHP sample
+    // (`https://api.espees.org/v2/payment/product`) — not the same as
+    // ESPEES_BASE_URL previously had, which pointed at a URL that doesn't
+    // match their documented API at all.
+    'base_url' => env('ESPEES_BASE_URL', 'https://api.espees.org/v2'),
+    // Separate domain — this is the hosted checkout page users are
+    // redirected to after we create a payment product, NOT an API host.
+    'payment_portal_url' => env('ESPEES_PAYMENT_PORTAL_URL', 'https://payment.espees.org/pay'),
     'api_key' => env('ESPEES_API_KEY'),
+    // The real payment API only requires x-api-key (confirmed from their
+    // docs) — no secret key. Left here in case webhook signature
+    // verification needs it later, but the service no longer sends it.
     'secret_key' => env('ESPEES_SECRET_KEY'),
-    'merchant_address' => env('ESPEES_MERCHANT_ADDRESS'),
+    'merchant_wallet' => env('ESPEES_MERCHANT_ADDRESS'),
     'webhook_secret' => env('ESPEES_WEBHOOK_SECRET'),
 ],
 
 'termii' => [
     'api_key'   => env('TERMII_API_KEY'),
     'sender_id' => env('TERMII_SENDER_ID', 'Sbrai'),
+    'base_url' => env('TERMII_BASE_URL', 'https://v4.api.termii.com'),
 ],
 
 ];

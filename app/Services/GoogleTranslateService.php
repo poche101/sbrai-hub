@@ -45,22 +45,49 @@ class GoogleTranslateService
     {
         $key = config('services.google.translate_key', '');
 
-        try {
-            $res = Http::timeout(15)->post(self::$baseUrl . "?key={$key}", [
-                'q'      => $texts,
-                'source' => 'en',
-                'target' => $target,
-                'format' => 'text',
-            ]);
+        // Reuse each text's 7-day cache (same key scheme as translate()) so
+        // repeat visitors and repeat page loads don't re-bill Google for
+        // content that's already been translated once. Only genuinely
+        // uncached texts get sent to the API.
+        $cacheKeys = array_map(fn ($t) => "translate:{$target}:" . md5($t), $texts);
+        $cached    = Cache::many($cacheKeys);
 
-            if ($res->successful()) {
-                $translations = $res->json('data.translations');
-                return array_column($translations ?? [], 'translatedText') ?: $texts;
+        $toFetch      = [];
+        $toFetchIndex = [];
+        foreach ($texts as $i => $text) {
+            if ($cached[$cacheKeys[$i]] === null) {
+                $toFetch[]      = $text;
+                $toFetchIndex[] = $i;
             }
-        } catch (\Exception $e) {
-            Log::error('Google Translate batch: ' . $e->getMessage());
         }
 
-        return $texts;
+        $fetched = [];
+        if (!empty($toFetch)) {
+            try {
+                $res = Http::timeout(15)->post(self::$baseUrl . "?key={$key}", [
+                    'q'      => $toFetch,
+                    'source' => 'en',
+                    'target' => $target,
+                    'format' => 'text',
+                ]);
+
+                if ($res->successful()) {
+                    $translations = $res->json('data.translations');
+                    $fetched      = array_column($translations ?? [], 'translatedText');
+                }
+            } catch (\Exception $e) {
+                Log::error('Google Translate batch: ' . $e->getMessage());
+            }
+        }
+
+        $results = $cached;
+        foreach ($toFetchIndex as $j => $i) {
+            $translated = $fetched[$j] ?? $texts[$i]; // graceful fallback to original
+            $results[$cacheKeys[$i]] = $translated;
+            Cache::put($cacheKeys[$i], $translated, now()->addDays(7));
+        }
+
+        // Reassemble in original input order.
+        return array_map(fn ($i) => $results[$cacheKeys[$i]] ?? $texts[$i], array_keys($texts));
     }
 }

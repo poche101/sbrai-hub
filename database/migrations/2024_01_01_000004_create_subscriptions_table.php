@@ -15,7 +15,7 @@ return new class extends Migration
             $table->timestamp('start_date');
             $table->timestamp('end_date');
             $table->decimal('amount_paid', 10, 2);
-            $table->enum('payment_method', ['stripe', 'espees'])->default('stripe');
+            $table->enum('payment_method', ['paystack', 'espees'])->default('paystack');
             $table->string('transaction_id')->nullable();
             $table->string('payment_gateway', 50)->nullable();
             $table->timestamps();

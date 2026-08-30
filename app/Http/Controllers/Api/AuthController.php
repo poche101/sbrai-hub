@@ -564,4 +564,6 @@ class AuthController extends Controller
             'currency' => 'NGN',
         ];
     }
+
+
 }
