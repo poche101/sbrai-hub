@@ -13,9 +13,9 @@
 
     Usage:
         <x-category-sidebar />
-        <x-category-sidebar :active="$activeCategoryName" />
+        <x-category-sidebar :active="$activeCategorySlug" />
         <x-category-sidebar :listing-type="'product'" />
-        <x-category-sidebar :categories="$categories" :active="$activeCategoryName" />
+        <x-category-sidebar :categories="$categories" :active="$activeCategorySlug" />
 --}}
 @php
     $active = $active ?? null;
@@ -34,16 +34,16 @@
 
     <nav class="py-1 max-h-[520px] overflow-y-auto">
         @forelse ($categories as $category)
-            @php $isActive = $active === $category->name; @endphp
+            @php $isActive = $active === $category->slug; @endphp
             <a
-                href="/browse?category={{ urlencode($category->name) }}"
+                href="/browse?category={{ urlencode($category->slug) }}"
                 class="group flex items-center justify-between gap-3 px-4 py-2.5 text-sm transition-colors
                        {{ $isActive ? 'bg-orange-50 text-orange-600 font-semibold' : 'text-gray-700 hover:bg-gray-50 hover:text-orange-600' }}"
             >
                 <span class="flex items-center gap-3 min-w-0">
                     <span class="w-8 h-8 rounded-full bg-orange-50 flex items-center justify-center text-base shrink-0 overflow-hidden">
-                        @if($category->image)
-                            <img src="{{ \Illuminate\Support\Facades\Storage::url($category->image) }}"
+                        @if(!empty($category->image_url) || !empty($category->image))
+                            <img src="{{ asset($category->image_url ?? $category->image) }}"
                                  alt="{{ $category->name }}"
                                  class="w-full h-full object-cover">
                         @else

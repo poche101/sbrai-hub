@@ -23,13 +23,15 @@
     <p>Enter a new password for {{ $email }}.</p>
 
     @if(session('status'))
-      <div class="msg success">{{ session('status') }}</div>
-    @endif
+    <div class="mb-4 text-sm text-green-700 bg-green-50 border border-green-200 rounded-xl p-3 text-center">
+        {{ session('status') }}
+    </div>
+@endif
     @if($errors->any())
       <div class="msg error">{{ $errors->first() }}</div>
     @endif
 
-    <form method="POST" action="{{ url('/api/v1/auth/reset-password') }}">
+    <form method="POST" action="{{ url('/api/v1/auth/reset-password-form') }}">
       @csrf
       <input type="hidden" name="email" value="{{ $email }}">
       <input type="hidden" name="token" value="{{ $token }}">

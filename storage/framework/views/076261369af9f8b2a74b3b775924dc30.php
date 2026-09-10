@@ -16,16 +16,16 @@
 
     <nav class="py-1 max-h-[520px] overflow-y-auto">
         <?php $__empty_1 = true; $__currentLoopData = $categories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $category): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-            <?php $isActive = $active === $category->name; ?>
+            <?php $isActive = $active === $category->slug; ?>
             <a
-                href="/browse?category=<?php echo e(urlencode($category->name)); ?>"
+                href="/browse?category=<?php echo e(urlencode($category->slug)); ?>"
                 class="group flex items-center justify-between gap-3 px-4 py-2.5 text-sm transition-colors
                        <?php echo e($isActive ? 'bg-orange-50 text-orange-600 font-semibold' : 'text-gray-700 hover:bg-gray-50 hover:text-orange-600'); ?>"
             >
                 <span class="flex items-center gap-3 min-w-0">
                     <span class="w-8 h-8 rounded-full bg-orange-50 flex items-center justify-center text-base shrink-0 overflow-hidden">
-                        <?php if($category->image): ?>
-                            <img src="<?php echo e(\Illuminate\Support\Facades\Storage::url($category->image)); ?>"
+                        <?php if(!empty($category->image_url) || !empty($category->image)): ?>
+                            <img src="<?php echo e(asset($category->image_url ?? $category->image)); ?>"
                                  alt="<?php echo e($category->name); ?>"
                                  class="w-full h-full object-cover">
                         <?php else: ?>

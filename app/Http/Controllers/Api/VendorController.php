@@ -67,6 +67,9 @@ class VendorController extends Controller
                 'review_count'     => $vendor->review_count ?? 0,
                 'joined'           => $vendor->created_at->format('M Y'),
                 'listing_count'    => $vendor->listings()->where('status', 'active')->count(),
+                // Gated by the vendor's own Settings > Privacy toggles.
+                'phone'            => $vendor->privacyAllows('show_phone') ? $vendor->phone : null,
+                'is_online'        => $vendor->is_online,
             ],
         ]);
     }

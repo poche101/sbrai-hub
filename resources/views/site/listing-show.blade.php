@@ -56,26 +56,38 @@
                 <div class="border border-gray-200 rounded-lg p-4 bg-white">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="font-semibold text-gray-900">
+                            <p class="font-semibold text-gray-900 flex items-center gap-1.5">
                                 {{ $listing->vendor->business_name ?? $listing->vendor->full_name }}
+                                @if ($listing->vendor->is_online)
+                                    <span class="w-2 h-2 rounded-full bg-green-500" title="Online now"></span>
+                                @endif
                             </p>
                             @if ($listing->vendor->is_verified)
                                 <p class="text-xs text-green-600 mt-0.5">✓ Verified vendor</p>
                             @else
                                 <p class="text-xs text-gray-400 mt-0.5">Not yet verified</p>
                             @endif
+                            @if ($listing->vendor->privacyAllows('show_phone') && $listing->vendor->phone)
+                                <p class="text-xs text-gray-500 mt-0.5">📞 {{ $listing->vendor->phone }}</p>
+                            @endif
                         </div>
                         <button id="fav-btn" type="button" class="sbrai-fav-btn w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center" aria-label="Save listing">♥</button>
                     </div>
 
-                    <div class="mt-4 space-y-2">
-                        <button id="chat-btn" type="button" class="w-full bg-orange-600 text-white font-medium py-2.5 rounded-md hover:bg-orange-700">
-                            Chat with vendor
-                        </button>
-                        <button id="call-btn" type="button" class="w-full border border-orange-600 text-orange-700 font-medium py-2.5 rounded-md hover:bg-orange-50">
-                            Voice / video call
-                        </button>
-                    </div>
+                    @if ($listing->vendor->privacyAllows('allow_messages'))
+                        <div class="mt-4 space-y-2">
+                            <button id="chat-btn" type="button" class="w-full bg-orange-600 text-white font-medium py-2.5 rounded-md hover:bg-orange-700">
+                                Chat with vendor
+                            </button>
+                            <button id="call-btn" type="button" class="w-full border border-orange-600 text-orange-700 font-medium py-2.5 rounded-md hover:bg-orange-50">
+                                Voice / video call
+                            </button>
+                        </div>
+                    @else
+                        <p class="mt-4 text-xs text-gray-500 bg-gray-50 border border-gray-200 rounded-md p-2.5">
+                            This vendor is not accepting new messages right now.
+                        </p>
+                    @endif
 
                     <p id="contact-gate-note" class="hidden mt-3 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-md p-2"></p>
 

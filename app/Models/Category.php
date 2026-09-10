@@ -5,10 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
 class Category extends Model
 {
     use HasFactory, SoftDeletes;
+
+    // Indicate that IDs are non-incrementing UUID strings
+    public $incrementing = false;
+    protected $keyType = 'string';
 
     protected $fillable = [
         'name', 'slug', 'listing_type', 'icon', 'image_url',
@@ -20,13 +25,6 @@ class Category extends Model
         'sort_order' => 'integer',
     ];
 
-    /**
-     * Deterministic color-gradient for a category/listing name, used as the
-     * card thumbnail whenever a listing has no photo yet. The exact same
-     * hash + palette is reimplemented in resources/js/site/gradient.js for
-     * client-rendered cards (browse, favourites) so the same name always
-     * produces the same gradient everywhere on the site.
-     */
     public static function gradientFor(string $name): string
     {
         $palette = [
@@ -49,12 +47,12 @@ class Category extends Model
     }
 
     /**
-     * Override standard binding to support both numeric database IDs
-     * in the admin panel and text slugs in the frontend applications.
+     * Resolve model binding by UUID (admin) or slug (frontend).
      */
     public function resolveRouteBinding($value, $field = null)
     {
-        if (is_numeric($value)) {
+        // Check if value is a valid UUID pattern
+        if (Str::isUuid($value)) {
             return $this->where('id', $value)->firstOrFail();
         }
 
@@ -79,18 +77,19 @@ class Category extends Model
     protected static function booted()
     {
         static::creating(function ($category) {
+            // Auto-generate UUID if missing
+            if (empty($category->id)) {
+                $category->id = (string) Str::uuid();
+            }
+
             if (empty($category->slug)) {
-                $category->slug = \Illuminate\Support\Str::slug($category->name);
+                $category->slug = Str::slug($category->name);
             }
         });
     }
 
-    /**
- * Force Laravel to bind and lookup categories using their text slug column
- * instead of corrupt, duplicate primary key integer IDs.
- */
-public function getRouteKeyName()
-{
-    return 'slug';
-}
+    public function getRouteKeyName()
+    {
+        return 'slug';
+    }
 }

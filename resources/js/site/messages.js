@@ -47,8 +47,11 @@ export function initMessagesPage() {
                     data-chat-id="${c.id}"
                     class="w-full text-left p-3 rounded-md hover:bg-gray-50 flex gap-3 items-center ${c.id === activeChatId ? 'bg-orange-50' : ''}"
                 >
-                    <div class="w-10 h-10 rounded-full bg-gray-200 shrink-0 overflow-hidden">
-                        ${c.other_user_avatar ? `<img src="${c.other_user_avatar}" class="w-full h-full object-cover">` : ''}
+                    <div class="relative w-10 h-10 shrink-0">
+                        <div class="w-10 h-10 rounded-full bg-gray-200 overflow-hidden">
+                            ${c.other_user_avatar ? `<img src="${c.other_user_avatar}" class="w-full h-full object-cover">` : ''}
+                        </div>
+                        ${c.is_online ? '<span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-green-500 ring-2 ring-white"></span>' : ''}
                     </div>
                     <div class="min-w-0 flex-1">
                         <div class="flex justify-between items-baseline">

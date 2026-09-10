@@ -199,7 +199,7 @@
 
         <div class="relative z-10 w-full max-w-md">
 
-            <div class="auth-card bg-white rounded-3xl shadow-2xl shadow-gray-900/10 border-2 border-gray-900 p-8 sm:p-10">
+            <div class="auth-card bg-white rounded-3xl shadow-2xl shadow-gray-900/10 border border-gray-200 p-8 sm:p-10">
 
                 
                 <div class="flex flex-col items-center text-center mb-8">
@@ -222,7 +222,7 @@
                         <p data-form-error class="hidden text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl p-3"></p>
 
                         
-                        <div class="role-toggle flex bg-gray-100 rounded-xl p-1 border-2 border-gray-900/80 mb-2" data-toggle-group="login">
+                        <div class="role-toggle flex bg-gray-100 rounded-xl p-1 border border-gray-200 mb-2" data-toggle-group="login">
                             <div class="role-toggle-indicator" data-toggle-indicator></div>
                             <label class="flex-1">
                                 <input type="radio" name="login_role" value="buyer" data-login-role-option class="sr-only" checked>
@@ -261,7 +261,7 @@
                         <div>
                             <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Email Address</label>
                             <input type="email" name="email" required placeholder="john@example.com"
-                                   class="auth-input w-full rounded-xl border-2 border-gray-900/80 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-orange-600">
+                                   class="auth-input w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-orange-600">
                         </div>
                         <div>
                             <div class="flex items-center justify-between mb-2">
@@ -270,7 +270,7 @@
                             </div>
                             <div class="password-field-wrap">
                                 <input type="password" name="password" required placeholder="Enter your password"
-                                       class="auth-input w-full rounded-xl border-2 border-gray-900/80 bg-white px-4 py-3 pr-12 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-orange-600">
+                                       class="auth-input w-full rounded-xl border border-gray-200 bg-white px-4 py-3 pr-12 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-orange-600">
                                 <button type="button" data-password-toggle tabindex="-1" aria-label="Show password"
                                         class="password-toggle-btn">
                                     <span class="password-toggle-icon-stack">
@@ -306,7 +306,7 @@
                         <p data-form-error class="hidden text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl p-3"></p>
 
                         
-                        <div class="role-toggle flex bg-gray-100 rounded-xl p-1 border-2 border-gray-900/80 mb-2" data-toggle-group="register">
+                        <div class="role-toggle flex bg-gray-100 rounded-xl p-1 border border-gray-200 mb-2" data-toggle-group="register">
                             <div class="role-toggle-indicator" data-toggle-indicator style="background:#111827; box-shadow:0 2px 8px -1px rgba(17,24,39,0.4), 0 1px 2px rgba(0,0,0,0.06);"></div>
                             <label class="flex-1">
                                 <input type="radio" name="role" value="buyer" data-role-option class="sr-only" checked>
@@ -345,22 +345,22 @@
                         <div>
                             <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Full Name</label>
                             <input type="text" name="full_name" required placeholder="John Doe"
-                                   class="auth-input w-full rounded-xl border-2 border-gray-900/80 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-orange-600">
+                                   class="auth-input w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-orange-600">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Email Address</label>
                             <input type="email" name="email" required placeholder="john@example.com"
-                                   class="auth-input w-full rounded-xl border-2 border-gray-900/80 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-orange-600">
+                                   class="auth-input w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-orange-600">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Phone Number</label>
                             <input type="tel" name="phone" required placeholder="0801234567"
-                                   class="auth-input w-full rounded-xl border-2 border-gray-900/80 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-orange-600">
+                                   class="auth-input w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-orange-600">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Address <span class="text-gray-400 font-normal normal-case">(Optional)</span></label>
                             <input type="text" name="address" placeholder="Your location"
-                                   class="auth-input w-full rounded-xl border-2 border-gray-900/80 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-orange-600">
+                                   class="auth-input w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-orange-600">
                         </div>
 
                         
@@ -368,17 +368,17 @@
                             <div>
                                 <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Business Name</label>
                                 <input type="text" name="business_name" placeholder="Your business name"
-                                       class="auth-input w-full rounded-xl border-2 border-gray-900/80 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-orange-600">
+                                       class="auth-input w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-orange-600">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Business Address <span class="text-gray-400 font-normal normal-case">(Optional)</span></label>
                                 <input type="text" name="business_address" placeholder="Shop/office address"
-                                       class="auth-input w-full rounded-xl border-2 border-gray-900/80 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-orange-600">
+                                       class="auth-input w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-orange-600">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">CAC Number <span class="text-gray-400 font-normal normal-case">(optional now, needed later for KYC)</span></label>
                                 <input type="text" name="cac_number" placeholder="RC1234567"
-                                       class="auth-input w-full rounded-xl border-2 border-gray-900/80 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-orange-600">
+                                       class="auth-input w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-orange-600">
                             </div>
                         </div>
 
@@ -386,7 +386,7 @@
                             <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Password</label>
                             <div class="password-field-wrap">
                                 <input type="password" name="password" required minlength="6" placeholder="Create a password"
-                                       class="auth-input w-full rounded-xl border-2 border-gray-900/80 bg-white px-4 py-3 pr-12 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-orange-600">
+                                       class="auth-input w-full rounded-xl border border-gray-200 bg-white px-4 py-3 pr-12 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-orange-600">
                                 <button type="button" data-password-toggle tabindex="-1" aria-label="Show password"
                                         class="password-toggle-btn">
                                     <span class="password-toggle-icon-stack">
@@ -408,7 +408,7 @@
                             <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Confirm Password</label>
                             <div class="password-field-wrap">
                                 <input type="password" name="password_confirmation" required minlength="6" placeholder="Re-enter password"
-                                       class="auth-input w-full rounded-xl border-2 border-gray-900/80 bg-white px-4 py-3 pr-12 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-orange-600">
+                                       class="auth-input w-full rounded-xl border border-gray-200 bg-white px-4 py-3 pr-12 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-orange-600">
                                 <button type="button" data-password-toggle tabindex="-1" aria-label="Show password"
                                         class="password-toggle-btn">
                                     <span class="password-toggle-icon-stack">
@@ -428,7 +428,7 @@
                         </div>
 
                         <label class="flex items-start gap-2.5 text-sm text-gray-600">
-                            <input type="checkbox" name="agree_terms" required class="mt-0.5 h-4 w-4 rounded border-2 border-gray-900 text-orange-600 focus:ring-orange-500">
+                            <input type="checkbox" name="agree_terms" required class="mt-0.5 h-4 w-4 rounded border-gray-300 text-orange-600 focus:ring-orange-500">
                             <span>
                                 I agree to the
                                 <a href="/terms" target="_blank" class="auth-link text-orange-600 font-semibold">Terms &amp; Conditions</a>

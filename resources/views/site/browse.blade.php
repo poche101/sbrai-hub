@@ -48,8 +48,8 @@
                 >All</button>
                 @foreach ($categories as $category)
                     <button
-                        type="button" data-category-chip="{{ $category->name }}"
-                        class="sbrai-chip {{ $initial['category'] === $category->name ? 'sbrai-chip-active' : '' }} px-4 py-2 rounded-full text-sm font-medium border border-gray-200"
+                        type="button" data-category-chip="{{ $category->slug }}"
+                        class="sbrai-chip {{ $initial['category'] === $category->slug ? 'sbrai-chip-active' : '' }} px-4 py-2 rounded-full text-sm font-medium border border-gray-200"
                     >{{ $category->name }}</button>
                 @endforeach
             </div>

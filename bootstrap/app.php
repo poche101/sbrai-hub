@@ -30,6 +30,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'role'             => \App\Http\Middleware\RoleMiddleware::class,
             'can_post_listing' => \App\Http\Middleware\CanPostListingMiddleware::class,
             'admin.only'       => \App\Http\Middleware\AdminOnlyMiddleware::class,
+            'track.last_seen'  => \App\Http\Middleware\TrackLastSeen::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

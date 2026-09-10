@@ -99,7 +99,7 @@
 
         <div class="relative z-10 w-full max-w-md">
 
-            <div class="auth-card bg-white rounded-3xl shadow-2xl shadow-gray-900/10 border-2 border-gray-900 p-8 sm:p-10">
+            <div class="auth-card bg-white rounded-3xl shadow-2xl shadow-gray-900/10 border border-gray-200 p-8 sm:p-10">
 
                 <div class="flex flex-col items-center text-center mb-8">
                     <div class="auth-icon w-14 h-14 rounded-2xl bg-orange-50 border border-orange-100 flex items-center justify-center mb-4 shadow-sm">
@@ -119,7 +119,7 @@
                     <div>
                         <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Email Address</label>
                         <input type="email" name="email" required placeholder="john@example.com"
-                               class="auth-input w-full rounded-xl border-2 border-gray-900/80 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-orange-600">
+                               class="auth-input w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-orange-600">
                     </div>
 
                     <button type="submit" class="auth-btn w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-3.5 rounded-xl shadow-sm mt-2">

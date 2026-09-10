@@ -14,7 +14,7 @@ class ListingController extends Controller
     // ─── Public: Index ────────────────────────────────────────────────
     public function index(Request $request): JsonResponse
     {
-        $query = Listing::with('vendor:id,full_name,business_name,is_verified,rating')
+        $query = Listing::with('vendor:id,full_name,business_name,is_verified,rating,phone,settings,last_seen_at')
             ->where('status', 'active');
 
         // Filters
@@ -107,6 +107,8 @@ class ListingController extends Controller
             'attributes'  => $request->attributes ?? [],
         ]);
 
+        $this->notifyInterestedBuyersOfNewListing($listing, $request->user()->id);
+
         return response()->json([
             'success' => true,
             'message' => 'Listing created successfully',
@@ -131,15 +133,58 @@ class ListingController extends Controller
             'status'      => 'sometimes|in:active,draft,sold,removed',
         ]);
 
+        $oldPrice = (float) $listing->price;
+
         $listing->update($request->only([
             'title', 'description', 'price', 'price_unit',
             'category', 'type', 'location', 'state', 'status',
         ]));
 
+        if ($request->has('price') && (float) $listing->price < $oldPrice) {
+            $this->notifyFavoritersOfPriceDrop($listing, $oldPrice);
+        }
+
         return response()->json([
             'success' => true,
             'listing' => $this->formatListing($listing->load('vendor')),
         ]);
+    }
+
+    // ─── Notification triggers ────────────────────────────────────────
+
+    // "New listings matching your interests": a buyer is considered
+    // interested in a category once they've favorited any listing in
+    // it. Fires when a vendor posts a new listing in that category.
+    private function notifyInterestedBuyersOfNewListing(Listing $listing, string $excludeUserId): void
+    {
+        $buyerIds = \App\Models\Favorite::whereHas('listing', function ($q) use ($listing) {
+                $q->where('category', $listing->category);
+            })
+            ->where('user_id', '!=', $excludeUserId)
+            ->distinct()
+            ->pluck('user_id');
+
+        if ($buyerIds->isEmpty()) {
+            return;
+        }
+
+        \App\Models\User::whereIn('id', $buyerIds)->get()->each(function ($buyer) use ($listing) {
+            if ($buyer->wantsNotification('new_listings')) {
+                \App\Services\NotificationService::sendNewListingMatch($buyer, $listing);
+            }
+        });
+    }
+
+    // "Price drops on favourited listings": fires for every buyer who
+    // favorited this listing, when its price goes down.
+    private function notifyFavoritersOfPriceDrop(Listing $listing, float $oldPrice): void
+    {
+        $listing->favorites()->with('user')->get()->each(function ($favorite) use ($listing, $oldPrice) {
+            $buyer = $favorite->user;
+            if ($buyer && $buyer->wantsNotification('price_drops')) {
+                \App\Services\NotificationService::sendPriceDrop($buyer, $listing, $oldPrice);
+            }
+        });
     }
 
     // ─── Vendor: Delete ───────────────────────────────────────────────
@@ -261,6 +306,10 @@ class ListingController extends Controller
             'vendor_business_name'  => $listing->vendor->business_name ?? null,
             'vendor_verified'       => $listing->vendor->is_verified ?? false,
             'vendor_rating'         => round($listing->vendor->rating ?? 0, 1),
+            // Gated by the vendor's own Settings > Privacy toggles.
+            'vendor_phone'          => $listing->vendor?->privacyAllows('show_phone') ? $listing->vendor->phone : null,
+            'vendor_is_online'      => $listing->vendor->is_online ?? false,
+            'vendor_allows_messages' => $listing->vendor?->privacyAllows('allow_messages') ?? true,
             'title'                 => $listing->title,
             'description'           => $listing->description,
             'price'                 => (float) $listing->price,

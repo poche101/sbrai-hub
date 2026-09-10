@@ -17,7 +17,13 @@ class ChatController extends Controller
                 $q->where('buyer_id', $request->user()->id)
                   ->orWhere('vendor_id', $request->user()->id);
             })
-            ->with(['listing:id,title,image_urls', 'lastMessage', 'buyer:id,full_name,avatar_url', 'vendor:id,full_name,business_name,avatar_url'])
+            ->with([
+                'listing:id,title,image_urls',
+                'lastMessage',
+                // settings + last_seen_at needed for the is_online accessor
+                'buyer:id,full_name,avatar_url,settings,last_seen_at',
+                'vendor:id,full_name,business_name,avatar_url,settings,last_seen_at',
+            ])
             ->orderByDesc('updated_at')
             ->get();
 
@@ -43,7 +49,9 @@ class ChatController extends Controller
                         ->where('sender_id', '!=', $userId)
                         ->where('is_read', false)
                         ->count(),
-                    'is_online'             => false,
+                    // Real presence, gated by the other user's own
+                    // "Show my online status" privacy setting.
+                    'is_online'             => $other->is_online,
                 ];
             }),
         ]);
@@ -57,10 +65,26 @@ class ChatController extends Controller
             'message'    => 'required|string|max:1000',
         ]);
 
+        $vendor = User::findOrFail($request->vendor_id);
+
+        // Respect "Allow new people to message me" — only blocks a brand
+        // new conversation; replying in one that already exists (below)
+        // is unaffected.
+        $alreadyChatting = Chat::where('buyer_id', $request->user()->id)
+            ->where('vendor_id', $vendor->id)
+            ->exists();
+
+        if (!$alreadyChatting && !$vendor->privacyAllows('allow_messages')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This vendor is not accepting new messages right now.',
+            ], 403);
+        }
+
         // Find or create chat
         $chat = Chat::firstOrCreate([
             'buyer_id'   => $request->user()->id,
-            'vendor_id'  => $request->vendor_id,
+            'vendor_id'  => $vendor->id,
             'listing_id' => $request->listing_id,
         ]);
 
@@ -70,9 +94,10 @@ class ChatController extends Controller
             'content'   => $request->message,
         ]);
 
-        // Notify vendor
-        $vendor = User::find($request->vendor_id);
-        NotificationService::sendPush($vendor, 'New Message', $request->message);
+        // Notify vendor, respecting their "New messages" notification setting
+        if ($vendor->wantsNotification('messages')) {
+            NotificationService::sendPush($vendor, 'New Message', $request->message);
+        }
 
         return response()->json(['success' => true, 'chat' => ['id' => $chat->id]], 201);
     }
@@ -118,10 +143,10 @@ class ChatController extends Controller
 
         $chat->touch(); // Update updated_at for ordering
 
-        // Notify recipient
+        // Notify recipient, respecting their "New messages" notification setting
         $recipientId = $chat->buyer_id === $request->user()->id ? $chat->vendor_id : $chat->buyer_id;
         $recipient   = User::find($recipientId);
-        if ($recipient) {
+        if ($recipient && $recipient->wantsNotification('messages')) {
             NotificationService::sendPush($recipient, 'New Message', $request->content);
         }
 

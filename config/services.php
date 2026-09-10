@@ -85,4 +85,13 @@ return [
     'base_url' => env('TERMII_BASE_URL', 'https://v4.api.termii.com'),
 ],
 
+'firebase' => [
+    // Path to the Firebase service-account JSON, relative to the app
+    // root — e.g. FIREBASE_CREDENTIALS=storage/app/firebase/sbrai-solutions-5ad4b-firebase-adminsdk-fbsvc-1bcf79defe.json
+    // Kept outside git (see .gitignore) since it's a live credential,
+    // same sensitivity as the Paystack secret key.
+    'credentials' => env('FIREBASE_CREDENTIALS') ? base_path(env('FIREBASE_CREDENTIALS')) : null,
+    'project_id'  => env('FIREBASE_PROJECT_ID'),
+],
+
 ];

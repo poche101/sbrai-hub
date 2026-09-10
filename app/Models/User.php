@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens; // 1. IMPORT SANCTUM TRAIT
+use App\Notifications\ResetPasswordNotification;
+
 
 class User extends Authenticatable
 {
@@ -25,7 +27,7 @@ class User extends Authenticatable
         'kyc_documents', 'settings', 'fcm_token',
         'voucher_balance', 'last_login_at',
         'confirmation_token', 'account_confirmed_at',
-        'kyc_rejection_reason',
+        'kyc_rejection_reason', 'last_seen_at',
     ];
 
     protected $hidden = ['password', 'remember_token', 'fcm_token'];
@@ -36,6 +38,7 @@ class User extends Authenticatable
         'identity_verified_at' => 'datetime',
         'account_confirmed_at' => 'datetime',
         'last_login_at'        => 'datetime',
+        'last_seen_at'         => 'datetime',
         'is_verified'          => 'boolean',
         'kyc_documents'        => 'array',
         'settings'             => 'array',
@@ -113,4 +116,37 @@ class User extends Authenticatable
 
         return true;
     }
+
+    // ─── Settings helpers ────────────────────────────────────
+    // Read from the `settings` JSON column with the same defaults as
+    // AuthController::defaultSettings(), so a null/partial settings
+    // blob still behaves correctly everywhere these are checked.
+
+    public function wantsNotification(string $key): bool
+    {
+        // Matches AuthController::defaultSettings() — every notification
+        // defaults to on except promotional messages.
+        $default = $key === 'promotions' ? false : true;
+        return (bool) ($this->settings['notifications'][$key] ?? $default);
+    }
+
+    public function privacyAllows(string $key): bool
+    {
+        return (bool) ($this->settings['privacy'][$key] ?? true);
+    }
+
+    public function getIsOnlineAttribute(): bool
+    {
+        if (!$this->privacyAllows('show_online_status')) {
+            return false;
+        }
+
+        return $this->last_seen_at && $this->last_seen_at->gt(now()->subMinutes(5));
+    }
+
+
+public function sendPasswordResetNotification($token)
+{
+    $this->notify(new ResetPasswordNotification($token));
+}
 }

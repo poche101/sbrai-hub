@@ -447,34 +447,34 @@ class AuthController extends Controller
         ]);
     }
 
-    public function handleResetForm(Request $request)
-    {
-        $validated = $request->validate([
-            'token'                 => 'required|string',
-            'email'                 => 'required|email',
-            'password'              => 'required|min:6|confirmed',
-            'password_confirmation' => 'required',
-        ]);
+   public function handleResetForm(Request $request)
+{
+    $validated = $request->validate([
+        'token'                 => 'required|string',
+        'email'                 => 'required|email',
+        'password'              => 'required|min:6|confirmed',
+        'password_confirmation' => 'required',
+    ]);
 
-        $record = DB::table('password_reset_tokens')->where('email', $validated['email'])->first();
+    $record = DB::table('password_reset_tokens')->where('email', $validated['email'])->first();
 
-        if (!$record || !Hash::check($validated['token'], $record->token)) {
-            return back()->withErrors(['error' => 'Invalid or expired reset token.']);
-        }
-
-        if (now()->diffInMinutes($record->created_at) > 60) {
-            DB::table('password_reset_tokens')->where('email', $validated['email'])->delete();
-            return back()->withErrors(['error' => 'Reset link has expired. Please request a new one.']);
-        }
-
-        $user = User::where('email', $validated['email'])->first();
-        $user->update(['password' => Hash::make($validated['password'])]);
-        $user->tokens()->delete();
-
-        DB::table('password_reset_tokens')->where('email', $validated['email'])->delete();
-
-        return back()->with('status', 'Password reset successfully! You can now sign in from the Sbrai app.');
+    if (!$record || !Hash::check($validated['token'], $record->token)) {
+        return back()->withErrors(['error' => 'Invalid or expired reset token.']);
     }
+
+    if (now()->diffInMinutes($record->created_at) > 60) {
+        DB::table('password_reset_tokens')->where('email', $validated['email'])->delete();
+        return back()->withErrors(['error' => 'Reset link has expired. Please request a new one.']);
+    }
+
+    $user = User::where('email', $validated['email'])->first();
+    $user->update(['password' => Hash::make($validated['password'])]);
+    $user->tokens()->delete();
+
+    DB::table('password_reset_tokens')->where('email', $validated['email'])->delete();
+
+    return redirect()->route('site.auth')->with('status', 'Password reset successfully! You can now sign in.');
+}
 
     // ─── Account Confirmation (email link) ─────────────────────────────
     public function confirmAccount(string $token)

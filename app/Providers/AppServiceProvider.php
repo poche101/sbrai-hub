@@ -3,37 +3,29 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Route; // 💡 Added this import
-use Illuminate\Support\Facades\Blade;
-use App\Models\Category;              // 💡 Added this import
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\View;   // ← swap Blade for View
+use App\Models\Category;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
         //
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
-        // 💡 Explicitly bind the route parameter {id} to the Category model
         Route::model('id', Category::class);
 
-        // Registers the "mail" component namespace so <x-mail::layout> in
+        // Registers the "mail" view namespace so <x-mail::layout> in
         // resources/views/emails/*.blade.php resolves to
-        // resources/views/components/mail/layout.blade.php. This was
-        // never registered anywhere in the project — every email using
-        // <x-mail::layout> (otp, confirm-account, reset-password,
-        // subscription-confirmed) would throw "No hint path defined for
-        // [mail]" the moment it was actually sent, since dropping a file
-        // in components/mail/ alone only gives dot-notation <x-mail.layout>,
-        // not the :: namespace syntax those views actually use.
-        Blade::anonymousComponentNamespace('components.mail', 'mail');
+        // resources/views/components/mail/layout.blade.php. Laravel's
+        // Blade component compiler hardcodes a bypass for the "mail::"
+        // prefix that skips anonymousComponentNamespace() entirely and
+        // expects a real View namespace to already exist — which only
+        // happens automatically if a Mailable calls ->markdown(), which
+        // none of ours do (they all use ->view()).
+        View::addNamespace('mail', resource_path('views/components/mail'));
     }
 }

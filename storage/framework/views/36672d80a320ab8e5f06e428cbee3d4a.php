@@ -8,7 +8,15 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/tabler-icons.min.css">
     <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js', 'resources/js/site.js']); ?>
 
+    
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+
     <style>
+        /* Hides any element with x-cloak until Alpine has initialized,
+           preventing a flash of the support widget's panel/contents
+           being visible before Alpine binds x-show/x-data. */
+        [x-cloak] { display: none !important; }
+
         /* ── Modern dropdown panels (notifications + account menu) ─── */
         @keyframes dropdown-in {
             from { opacity: 0; transform: translateY(-6px) scale(0.98); }
@@ -380,13 +388,13 @@
                     Nigeria's verified marketplace for building materials, artisan services, and property — connecting trusted buyers and vendors nationwide.
                 </p>
                 <div class="flex items-center gap-2">
-                    <a href="#" aria-label="Facebook" class="footer-social-btn w-9 h-9 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center">
+                    <a href="facebook.com/Sbraisolutionshub" aria-label="Facebook" class="footer-social-btn w-9 h-9 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center">
                         <i class="ti ti-brand-facebook text-[17px]" aria-hidden="true"></i>
                     </a>
-                    <a href="#" aria-label="Instagram" class="footer-social-btn w-9 h-9 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center">
+                    <a href="https://www.instagram.com/sbraisolutions?igsi=MWlpZXZlZmFsNGF3aQ==" aria-label="Instagram" class="footer-social-btn w-9 h-9 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center">
                         <i class="ti ti-brand-instagram text-[17px]" aria-hidden="true"></i>
                     </a>
-                    <a href="#" aria-label="X (Twitter)" class="footer-social-btn w-9 h-9 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center">
+                    <a href="https://x.com/SbraiSolutions" aria-label="X (Twitter)" class="footer-social-btn w-9 h-9 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center">
                         <i class="ti ti-brand-x text-[17px]" aria-hidden="true"></i>
                     </a>
                     <a href="#" aria-label="WhatsApp" class="footer-social-btn w-9 h-9 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center">
@@ -412,8 +420,6 @@
             <div>
                 <p class="text-xs font-bold uppercase tracking-wider text-gray-900 mb-3">Company</p>
                 <ul class="space-y-2 text-sm text-gray-500">
-                    <li><a href="/about" class="footer-link">About us</a></li>
-                    <li><a href="/blog" class="footer-link">Blog</a></li>
                     <li><a href="/pricing" class="footer-link">Vendor pricing</a></li>
                     <li><a href="#" class="footer-link">Contact us</a></li>
                 </ul>
@@ -433,7 +439,7 @@
                 <ul class="space-y-2 text-sm text-gray-500">
                     <li><a href="#" class="footer-link">Terms &amp; conditions</a></li>
                     <li><a href="https://sbraisolutions.com/privacy-policy/" class="footer-link">Privacy policy</a></li>
-                    <li><a href="#" class="footer-link">Refund policy</a></li>
+
                 </ul>
             </div>
         </div>
@@ -456,7 +462,10 @@
                 </div>
             </div>
         </div>
+
     </footer>
+
+
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -493,6 +502,26 @@
             });
         });
     </script>
+ <?php if (isset($component)) { $__componentOriginalf51b2d4ac9329bddef336ce70ea8409c = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalf51b2d4ac9329bddef336ce70ea8409c = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.support-widget','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('support-widget'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+<?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginalf51b2d4ac9329bddef336ce70ea8409c)): ?>
+<?php $attributes = $__attributesOriginalf51b2d4ac9329bddef336ce70ea8409c; ?>
+<?php unset($__attributesOriginalf51b2d4ac9329bddef336ce70ea8409c); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginalf51b2d4ac9329bddef336ce70ea8409c)): ?>
+<?php $component = $__componentOriginalf51b2d4ac9329bddef336ce70ea8409c; ?>
+<?php unset($__componentOriginalf51b2d4ac9329bddef336ce70ea8409c); ?>
+<?php endif; ?>
 </body>
 </html>
 <?php /**PATH C:\Users\kings\Downloads\sbrai-app-backend-FIXED\resources\views/components/site-layout.blade.php ENDPATH**/ ?>

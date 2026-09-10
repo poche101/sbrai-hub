@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\VendorController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\CallingController;
 use App\Http\Controllers\Api\TranslationController;
+use App\Http\Controllers\Api\SupportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -55,8 +56,17 @@ Route::prefix('translate')->group(function () {
     Route::post('listing/{listingId}',  [TranslationController::class, 'translateListing']);
 });
 
+// Public support chat — guests and signed-in users can both use it.
+// SupportController::sendMessage checks $request->user() internally,
+// so it works whether or not a Sanctum token is present.
+Route::prefix('support')->group(function () {
+    Route::post('conversations',              [SupportController::class, 'start']);
+    Route::post('conversations/{id}/messages', [SupportController::class, 'sendMessage']);
+    Route::get('conversations/{id}/messages',  [SupportController::class, 'history']);
+});
+
 // ── Protected Routes (Sanctum Auth Required) ─────────────────────────────
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'track.last_seen'])->group(function () {
 
     // ─── Auth
     Route::prefix('auth')->group(function () {
