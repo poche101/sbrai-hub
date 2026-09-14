@@ -13,16 +13,27 @@
                 @endif
             </div>
 
-            @if ($conversation->status !== 'resolved')
-                <form method="POST" action="{{ route('admin.support.resolve', $conversation->id) }}">
-                    @csrf
-                    <button type="submit" class="text-sm font-semibold text-green-700 bg-green-50 hover:bg-green-100 px-3 py-2 rounded-lg">
-                        Mark resolved
-                    </button>
-                </form>
-            @else
-                <span class="text-sm font-semibold text-green-700 bg-green-50 px-3 py-2 rounded-lg">Resolved</span>
-            @endif
+            <div class="flex items-center gap-2">
+                <a href="{{ route('admin.support.download', $conversation->id) }}"
+                   class="text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-lg inline-flex items-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
+                    </svg>
+                    Download
+                </a>
+
+                @if ($conversation->status !== 'resolved')
+                    <form method="POST" action="{{ route('admin.support.resolve', $conversation->id) }}">
+                        @csrf
+                        <button type="submit" class="text-sm font-semibold text-green-700 bg-green-50 hover:bg-green-100 px-3 py-2 rounded-lg">
+                            Mark resolved
+                        </button>
+                    </form>
+                @else
+                    <span class="text-sm font-semibold text-green-700 bg-green-50 px-3 py-2 rounded-lg">Resolved</span>
+                @endif
+            </div>
         </div>
 
         @if (session('status'))

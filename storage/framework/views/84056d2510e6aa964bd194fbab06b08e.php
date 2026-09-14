@@ -14,7 +14,9 @@
 
     <!-- Hide Alpine elements before initialization to prevent flickering -->
     <style>
-        [x-cloak] { display: none !important; }
+        [x-cloak] {
+            display: none !important;
+        }
     </style>
 
     <style>
@@ -122,9 +124,11 @@
                         <div class="text-xs text-gray-400 truncate">Control Panel</div>
                     </div>
                 </div>
-                <button onclick="closeSidebar()" class="lg:hidden p-1 text-gray-400 hover:text-gray-600 flex-shrink-0" aria-label="Close menu">
+                <button onclick="closeSidebar()" class="lg:hidden p-1 text-gray-400 hover:text-gray-600 flex-shrink-0"
+                    aria-label="Close menu">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
@@ -183,6 +187,16 @@
                     </svg>
                     Listings
                 </a>
+
+
+            <a href="<?php echo e(route('admin.support.index')); ?>"
+                class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100 transition <?php echo e(request()->routeIs('admin.support*') ? 'active' : ''); ?>">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+                Support
+            </a>
             </nav>
 
             <div class="p-4 border-t border-gray-200">
@@ -206,14 +220,20 @@
                 class="bg-white border-b border-gray-200 px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between sticky top-0 z-30 gap-3">
                 <div class="flex items-center gap-3 min-w-0">
                     
-                    <button onclick="openSidebar()" class="lg:hidden p-1.5 -ml-1.5 text-gray-500 hover:text-gray-800 flex-shrink-0" aria-label="Open menu">
+                    <button onclick="openSidebar()"
+                        class="lg:hidden p-1.5 -ml-1.5 text-gray-500 hover:text-gray-800 flex-shrink-0"
+                        aria-label="Open menu">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 12h16M4 18h16" />
                         </svg>
                     </button>
                     <div class="min-w-0">
-                        <h1 class="text-base sm:text-lg font-bold text-gray-900 truncate"><?php echo e($title ?? 'Dashboard'); ?></h1>
-                        <p class="text-xs text-gray-400 truncate hidden sm:block"><?php echo e($subtitle ?? 'Manage Sbrai Hub'); ?></p>
+                        <h1 class="text-base sm:text-lg font-bold text-gray-900 truncate"><?php echo e($title ?? 'Dashboard'); ?>
+
+                        </h1>
+                        <p class="text-xs text-gray-400 truncate hidden sm:block">
+                            <?php echo e($subtitle ?? 'Manage Sbrai Hub'); ?></p>
                     </div>
                 </div>
                 <div class="flex items-center gap-3 sm:gap-4 flex-shrink-0">
