@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Sbrai Solutions site — small stateful UI helpers ─────────────── */
+@layer components {
+    .sbrai-fav-btn {
+        color: #9ca3af; /* gray-400 */
+    }
+    .sbrai-fav-btn.sbrai-fav-active {
+        color: #dc2626; /* red-600 */
+    }
+
+    /* Compound selectors (two classes) so these reliably win over the
+       plain single-utility "inactive" classes already on the element,
+       regardless of Tailwind's components-vs-utilities layer order. */
+    .sbrai-option-btn.sbrai-option-active {
+        @apply border-orange-600 ring-2 ring-orange-100 bg-orange-50;
+    }
+
+    .sbrai-step-dot.sbrai-step-active {
+        @apply bg-orange-600 text-white;
+    }
+    .sbrai-step-dot.sbrai-step-done {
+        @apply bg-orange-100 text-orange-700;
+    }
+
+    .sbrai-chip {
+        @apply bg-white text-gray-700;
+    }
+    .sbrai-chip.sbrai-chip-active {
+        @apply bg-orange-600 text-white border-orange-600;
+    }
+}
+
