@@ -36,10 +36,16 @@ class OtpService
         );
     }
 
-    public static function sendSms(string $phone, string $otp): void
+    /**
+     * Returns true only if Termii actually accepted the SMS for delivery.
+     * A non-2xx response (e.g. an unapproved sender ID, insufficient
+     * balance) previously went completely unnoticed — Http::post()
+     * doesn't throw on its own, so the caller always saw "success".
+     */
+    public static function sendSms(string $phone, string $otp): bool
     {
         try {
-            Http::withHeaders(['Content-Type' => 'application/json'])
+            $response = Http::withHeaders(['Content-Type' => 'application/json'])
                 ->post('https://api.ng.termii.com/api/sms/send', [
                     'to'      => $phone,
                     'from'    => 'Sbrai',
@@ -48,8 +54,16 @@ class OtpService
                     'channel' => 'generic',
                     'api_key' => config('services.termii.api_key', ''),
                 ]);
+
+            if ($response->failed()) {
+                Log::error('SMS OTP failed: ' . $response->body());
+                return false;
+            }
+
+            return true;
         } catch (\Exception $e) {
             Log::error('SMS OTP: ' . $e->getMessage());
+            return false;
         }
     }
 }

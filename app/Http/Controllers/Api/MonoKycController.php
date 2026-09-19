@@ -225,7 +225,14 @@ class MonoKycController extends Controller
         }
 
         $otp = OtpService::generate($phone, 'phone_verify');
-        OtpService::sendSms($phone, $otp);
+        $sent = OtpService::sendSms($phone, $otp);
+
+        if (!$sent) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Could not send the verification code. Please try again shortly.',
+            ], 502);
+        }
 
         return response()->json(['success' => true, 'message' => 'OTP sent to ' . $phone]);
     }
@@ -270,7 +277,7 @@ class MonoKycController extends Controller
         $urls = $user->kyc_documents ?? [];
 
         foreach ($request->file('images', []) as $file) {
-            $path   = $file->store("kyc/{$user->id}", 'private');
+            $path   = $file->store("kyc/{$user->id}", 'local');
             $urls[] = $path;
         }
 

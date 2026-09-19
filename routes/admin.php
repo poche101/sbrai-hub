@@ -59,6 +59,7 @@ Route::middleware(['auth', 'admin.only'])->group(function () {
         Route::get('/{id}/messages', [SupportController::class, 'messages'])->name('messages');
         Route::post('/{id}/reply', [SupportController::class, 'reply'])->name('reply');
         Route::post('/{id}/resolve', [SupportController::class, 'resolve'])->name('resolve');
+        Route::get('/{id}/download', [SupportController::class, 'download'])->name('download');
     });
 
     // 💡 ALWAYS put the generic show route at the absolute bottom of the list

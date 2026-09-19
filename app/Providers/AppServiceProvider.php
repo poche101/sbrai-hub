@@ -16,7 +16,6 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        Route::model('id', Category::class);
 
         // Registers the "mail" view namespace so <x-mail::layout> in
         // resources/views/emails/*.blade.php resolves to

@@ -65,6 +65,10 @@ Route::prefix('support')->group(function () {
     Route::get('conversations/{id}/messages',  [SupportController::class, 'history']);
 });
 
+Route::get('vendors/{id}', [VendorController::class, 'show']);
+Route::get('vendors/{id}/listings', [VendorController::class, 'listings']);
+Route::get('vendors/{id}/reviews', [VendorController::class, 'reviews']);
+
 // ── Protected Routes (Sanctum Auth Required) ─────────────────────────────
 Route::middleware(['auth:sanctum', 'track.last_seen'])->group(function () {
 
@@ -157,10 +161,6 @@ Route::middleware(['auth:sanctum', 'track.last_seen'])->group(function () {
     // ─── Search
     Route::get('search', [ListingController::class, 'search']);
 
-    // ─── Vendor Profile (public)
-    Route::get('vendors/{id}',              [VendorController::class, 'show']);
-    Route::get('vendors/{id}/listings',     [VendorController::class, 'listings']);
-    Route::get('vendors/{id}/reviews',      [VendorController::class, 'reviews']);
     Route::post('vendors/{id}/review',      [VendorController::class, 'addReview']);
 
     // ─── Calling (Agora)

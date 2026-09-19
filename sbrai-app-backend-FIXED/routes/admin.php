@@ -23,7 +23,7 @@ Route::middleware('guest')->group(function () {
 // ─── Authenticated Admin ───────────────────────────────────────────────
 Route::middleware(['auth', 'admin.only'])->group(function () {
     Route::post('logout', [AdminAuthController::class, 'logout'])->name('logout');
-
+     Route::get('debug-ping', fn () => 'PONG-' . (auth()->check() ? auth()->user()->role : 'GUEST'));
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard.alt');
 
@@ -55,7 +55,7 @@ Route::middleware(['auth', 'admin.only'])->group(function () {
     // ─── Support Inbox (AI chat escalations) ────────────────────────
     Route::prefix('support')->name('support.')->group(function () {
         Route::get('/', [SupportController::class, 'index'])->name('index');
-        Route::get('/{id}', [SupportController::class, 'show'])->name('show');
+        Route::get('/{id}', fn ($id) => "GOT: $id")->name('show');
         Route::get('/{id}/messages', [SupportController::class, 'messages'])->name('messages');
         Route::get('/{id}/download', [SupportController::class, 'download'])->name('download');
         Route::post('/{id}/reply', [SupportController::class, 'reply'])->name('reply');

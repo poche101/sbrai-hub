@@ -134,6 +134,12 @@ class AuthController extends Controller
         $email = $payload['email'] ?? null;
         $googleId = $payload['sub'] ?? null;
 
+        if (($payload['aud'] ?? null) !== config('services.google.client_id')) {
+            throw ValidationException::withMessages([
+                'id_token' => ['This token was not issued for this app.'],
+            ]);
+        }
+
         if (!$email || !$googleId) {
             throw ValidationException::withMessages([
                 'id_token' => ['Google did not return the expected account details.'],
@@ -211,6 +217,21 @@ class AuthController extends Controller
         $payload = $response->json();
         $email = $payload['email'] ?? null;
         $facebookId = $payload['id'] ?? null;
+
+        $appToken = config('services.facebook.app_id') . '|' . config('services.facebook.app_secret');
+        $debug = \Illuminate\Support\Facades\Http::get('https://graph.facebook.com/debug_token', [
+            'input_token'  => $request->access_token,
+            'access_token' => $appToken,
+        ])->json();
+
+        if (
+            !($debug['data']['is_valid'] ?? false) ||
+            ($debug['data']['app_id'] ?? null) !== config('services.facebook.app_id')
+        ) {
+            throw ValidationException::withMessages([
+                'access_token' => ['This token was not issued for this app.'],
+            ]);
+        }
 
         if (!$facebookId) {
             throw ValidationException::withMessages([
