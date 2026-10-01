@@ -19,7 +19,6 @@ export function initKycPage() {
     const progressLabel = document.getElementById('kyc-progress-label');
     const verifiedBanner = document.getElementById('kyc-verified-banner');
     const emailBadge = document.getElementById('kyc-email-badge');
-    const phoneBadge = document.getElementById('kyc-phone-badge');
     const identityBadge = document.getElementById('kyc-identity-badge');
     const cacBadge = document.getElementById('kyc-cac-badge');
     const cacSection = document.getElementById('kyc-cac-section');
@@ -38,12 +37,10 @@ export function initKycPage() {
             progressLabel.textContent = `${data.progress}% complete`;
             verifiedBanner.classList.toggle('hidden', data.status !== 'verified');
             setBadge(emailBadge, data.email_verified);
-            setBadge(phoneBadge, data.phone_verified);
             setBadge(identityBadge, data.identity_verified);
             setBadge(cacBadge, data.is_verified, 'Business verified');
 
             document.getElementById('kyc-email-form').classList.toggle('hidden', data.email_verified);
-            document.getElementById('kyc-phone-form').classList.toggle('hidden', data.phone_verified);
             document.getElementById('kyc-identity-form').classList.toggle('hidden', data.identity_verified);
         } catch (err) {
             // Non-fatal — leave the page in its last-known state.
@@ -81,40 +78,6 @@ export function initKycPage() {
         } catch (err) {
             emailError.textContent = err.message;
             emailError.classList.remove('hidden');
-        }
-    });
-
-    // ── Phone OTP ──────────────────────────────────────────────────
-    const phoneSendBtn = document.getElementById('kyc-phone-send');
-    const phoneVerifyBox = document.getElementById('kyc-phone-verify-box');
-    const phoneOtpInput = document.getElementById('kyc-phone-otp');
-    const phoneError = document.getElementById('kyc-phone-error');
-
-    phoneSendBtn?.addEventListener('click', async () => {
-        phoneError.classList.add('hidden');
-        phoneSendBtn.disabled = true;
-        phoneSendBtn.textContent = 'Sending…';
-        try {
-            await apiFetch('/kyc/phone/send-otp', { method: 'POST' });
-            phoneVerifyBox.classList.remove('hidden');
-            phoneSendBtn.textContent = 'Code sent — resend';
-        } catch (err) {
-            phoneError.textContent = err.message;
-            phoneError.classList.remove('hidden');
-            phoneSendBtn.textContent = 'Send code via SMS';
-        } finally {
-            phoneSendBtn.disabled = false;
-        }
-    });
-
-    document.getElementById('kyc-phone-verify')?.addEventListener('click', async () => {
-        phoneError.classList.add('hidden');
-        try {
-            await apiFetch('/kyc/phone/verify', { method: 'POST', json: { otp: phoneOtpInput.value } });
-            refreshStatus();
-        } catch (err) {
-            phoneError.textContent = err.message;
-            phoneError.classList.remove('hidden');
         }
     });
 

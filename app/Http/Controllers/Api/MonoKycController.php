@@ -151,7 +151,9 @@ class MonoKycController extends Controller
             'success'           => true,
             'status'            => $user->kyc_status,
             'email_verified'    => $user->email_verified_at !== null,
-            'phone_verified'    => $user->phone_verified_at !== null,
+            // Stopgap for older mobile builds that still read this key.
+            // Remove once the Flutter app no longer has a phone step.
+            'phone_verified'    => true,
             'identity_verified' => $user->identity_verified_at !== null,
             'is_verified'       => $user->is_verified,
             'progress'          => $this->calcProgress($user),
@@ -209,66 +211,6 @@ class MonoKycController extends Controller
         return response()->json(['success' => true, 'message' => 'Email verified successfully']);
     }
 
-    // ─── Phone OTP (Termii SMS) ───────────────────────────────────────
-    public function sendPhoneOtp(Request $request): JsonResponse
-    {
-        $request->validate(['phone' => 'nullable|string|max:20']);
-
-        $user  = $request->user();
-        $phone = $request->input('phone') ?? $user?->phone;
-
-        if (!$phone) {
-            return response()->json([
-                'success' => false,
-                'message' => 'A valid phone number is required to send an OTP.'
-            ], 422);
-        }
-
-        $otp = OtpService::generate($phone, 'phone_verify');
-        $sent = OtpService::sendSms($phone, $otp);
-
-        if (!$sent) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Could not send the verification code. Please try again shortly.',
-            ], 502);
-        }
-
-        return response()->json(['success' => true, 'message' => 'OTP sent to ' . $phone]);
-    }
-
-    public function verifyPhone(Request $request): JsonResponse
-    {
-        $request->validate([
-            'otp'   => 'required|string|digits:6',
-            'phone' => 'nullable|string|max:20',
-        ]);
-
-        $user  = $request->user();
-        $phone = $request->input('phone') ?? $user?->phone;
-
-        if (!$phone) {
-            return response()->json([
-                'success' => false,
-                'message' => 'A phone number is required for verification.'
-            ], 422);
-        }
-
-        if (!OtpService::verify($phone, $request->otp, 'phone_verify')) {
-            return response()->json(['success' => false, 'message' => 'Invalid or expired OTP'], 422);
-        }
-
-        if ($user) {
-            $user->update([
-                'phone' => $phone,
-                'phone_verified_at' => now(),
-            ]);
-            $this->updateKycStatus($user);
-        }
-
-        return response()->json(['success' => true, 'message' => 'Phone verified successfully']);
-    }
-
     // ─── Upload KYC Docs ─────────────────────────────────────────────
     public function uploadDocuments(Request $request): JsonResponse
     {
@@ -290,12 +232,11 @@ class MonoKycController extends Controller
     private function updateKycStatus($user): void
     {
         $e = $user->email_verified_at    !== null;
-        $p = $user->phone_verified_at    !== null;
         $i = $user->identity_verified_at !== null;
 
-        if ($e && $p && $i) {
+        if ($e && $i) {
             $user->update(['kyc_status' => 'verified']);
-        } elseif ($e || $p || $i) {
+        } elseif ($e || $i) {
             if ($user->kyc_status === 'not_submitted') {
                 $user->update(['kyc_status' => 'pending']);
             }
@@ -306,8 +247,7 @@ class MonoKycController extends Controller
     {
         $done = 0;
         if ($user->email_verified_at)    $done++;
-        if ($user->phone_verified_at)    $done++;
         if ($user->identity_verified_at) $done++;
-        return (int)(($done / 3) * 100);
+        return (int)(($done / 2) * 100);
     }
 }
