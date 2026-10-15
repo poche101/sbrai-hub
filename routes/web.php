@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Site\HomeController;
@@ -38,6 +39,20 @@ Route::get('/post-ad',     [PostAdController::class, 'show'])->name('post-ad');
 Route::get('/messages',    [MessagesController::class, 'index'])->name('messages');
 Route::get('/kyc',         [KycController::class, 'show'])->name('kyc');
 Route::get('/pricing',     [PricingController::class, 'show'])->name('pricing');
+
+// Return URL for Paystack and Espees hosted checkouts. The Flutter
+// WebView closes itself as soon as it sees this URL; in a normal browser
+// we hand the reference back to the pricing page, which verifies it.
+Route::get('/payments/callback', function (Request $request) {
+    if ($request->query('gateway') === 'espees') {
+        $status = $request->query('status') === 'failed' ? 'failed' : 'success';
+        return redirect('/pricing?espees=' . $status);
+    }
+
+    $reference = $request->query('reference', $request->query('trxref'));
+
+    return redirect('/pricing' . ($reference ? '?reference=' . urlencode($reference) : ''));
+})->name('payments.callback');
 Route::get('/settings',    [SettingsController::class, 'show'])->name('settings');
 Route::get('/profile',     [ProfileController::class, 'show'])->name('profile');
 Route::get('/favourites',  [FavouritesController::class, 'show'])->name('favourites');

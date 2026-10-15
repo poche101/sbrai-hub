@@ -65,6 +65,10 @@ Route::prefix('support')->group(function () {
     Route::get('conversations/{id}/messages',  [SupportController::class, 'history']);
 });
 
+// Payment webhooks — public, authenticated by signature (not Sanctum).
+// Set in the Paystack dashboard: https://sbraisolutions.com/api/v1/webhooks/paystack
+Route::post('webhooks/paystack', [SubscriptionController::class, 'paystackWebhook']);
+
 Route::get('vendors/{id}', [VendorController::class, 'show']);
 Route::get('vendors/{id}/listings', [VendorController::class, 'listings']);
 Route::get('vendors/{id}/reviews', [VendorController::class, 'reviews']);

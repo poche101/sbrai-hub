@@ -64,7 +64,7 @@ class AuthController extends Controller
         // Send welcome notification
         NotificationService::sendWelcome($user);
 
-        $token = $user->createToken('sbrai-app')->plainTextToken;
+        $token = $this->issueToken($user);
 
         return response()->json([
             'success' => true,
@@ -90,10 +90,9 @@ class AuthController extends Controller
             ]);
         }
 
-        // Revoke old tokens (single device per user)
-        $user->tokens()->delete();
-
-        $token = $user->createToken('sbrai-app')->plainTextToken;
+        // Do NOT revoke the user's other tokens here: that signed the app out
+        // whenever they logged in on the website (and vice versa).
+        $token = $this->issueToken($user);
 
         // Update last login
         $user->update(['last_login_at' => now()]);
@@ -182,8 +181,7 @@ class AuthController extends Controller
             NotificationService::sendWelcome($user);
         }
 
-        $user->tokens()->delete();
-        $token = $user->createToken('sbrai-app')->plainTextToken;
+        $token = $this->issueToken($user);
         $user->update(['last_login_at' => now()]);
         $user->load('activeSubscription');
 
@@ -279,8 +277,7 @@ class AuthController extends Controller
             NotificationService::sendWelcome($user);
         }
 
-        $user->tokens()->delete();
-        $token = $user->createToken('sbrai-app')->plainTextToken;
+        $token = $this->issueToken($user);
         $user->update(['last_login_at' => now()]);
         $user->load('activeSubscription');
 
@@ -586,5 +583,24 @@ class AuthController extends Controller
         ];
     }
 
+    // ─── Token issuing ────────────────────────────────────────────────
+    // Issues a new API token WITHOUT revoking the user's other tokens, so
+    // signing in on the website doesn't sign out the app (or another
+    // phone), and vice versa. Tokens never expire on their own; only
+    // logout (current device), password reset and account deletion revoke
+    // them. Tokens unused for 90 days are pruned so they don't pile up.
+    private function issueToken(User $user): string
+    {
+        $user->tokens()
+            ->where(function ($q) {
+                $q->where('last_used_at', '<', now()->subDays(90))
+                  ->orWhere(function ($q2) {
+                      $q2->whereNull('last_used_at')
+                         ->where('created_at', '<', now()->subDays(90));
+                  });
+            })
+            ->delete();
 
+        return $user->createToken('sbrai-app')->plainTextToken;
+    }
 }

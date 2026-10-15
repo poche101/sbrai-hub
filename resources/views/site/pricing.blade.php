@@ -56,29 +56,32 @@
 
                 <div>
                     <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">Payment steps</h3>
-                    <ol class="text-sm text-gray-600 space-y-2.5 list-disc list-inside">
-                        <li>Click <strong class="text-gray-800">"Open Paystack checkout"</strong> below (opens in a new tab).</li>
-                        <li>Complete the secure ₦20,000 payment on Paystack.</li>
-                        <li>Copy the payment reference from your receipt/email, paste it below, and click verify.</li>
+                    <ol class="text-sm text-gray-600 space-y-2.5 list-decimal list-inside">
+                        <li>Click <strong class="text-gray-800">"Pay ₦20,000 with Paystack"</strong> below.</li>
+                        <li>Complete the secure payment on Paystack.</li>
+                        <li>You'll be brought back here and your subscription activates automatically.</li>
                     </ol>
                 </div>
 
-                <a id="paystack-checkout-link" href="#" target="_blank" rel="noopener"
+                <a id="paystack-checkout-link" href="#"
                    class="w-full inline-flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-700 text-white font-semibold px-6 py-3.5 rounded-xl shadow-md hover:shadow-lg transition-all">
                     <i class="ti ti-external-link text-lg"></i>
-                    Open Paystack checkout
+                    Pay ₦20,000 with Paystack
                 </a>
 
-                <form id="paystack-verify-form" class="flex flex-col sm:flex-row gap-2.5 pt-2 border-t border-gray-100">
-                    <div class="relative flex-1">
-                        <i class="ti ti-receipt absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-lg"></i>
-                        <input id="paystack-reference" type="text" required placeholder="Paste payment reference here"
-                               class="w-full rounded-xl border-2 border-gray-300 pl-10 pr-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-600 transition">
-                    </div>
-                    <button type="submit" class="bg-gray-900 hover:bg-black text-white text-sm font-semibold px-6 py-3 rounded-xl shadow-sm transition-all">
-                        Verify payment
-                    </button>
-                </form>
+                <div class="pt-2 border-t border-gray-100">
+                    <p class="text-xs text-gray-500 mb-2.5">Already paid but not activated? Paste your Paystack payment reference to verify it.</p>
+                    <form id="paystack-verify-form" class="flex flex-col sm:flex-row gap-2.5">
+                        <div class="relative flex-1">
+                            <i class="ti ti-receipt absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-lg"></i>
+                            <input id="paystack-reference" type="text" required placeholder="Paste payment reference here"
+                                   class="w-full rounded-xl border-2 border-gray-300 pl-10 pr-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-600 transition">
+                        </div>
+                        <button type="submit" class="bg-gray-900 hover:bg-black text-white text-sm font-semibold px-6 py-3 rounded-xl shadow-sm transition-all">
+                            Verify payment
+                        </button>
+                    </form>
+                </div>
                 <p id="paystack-error" class="hidden text-xs font-medium text-red-600 bg-red-50 border border-red-200 rounded-xl p-3"></p>
                 <p id="paystack-success" class="hidden text-xs font-medium text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-xl p-3"></p>
             </div>
@@ -97,7 +100,7 @@
 
                 <p class="text-sm text-gray-600 leading-relaxed bg-gray-50 border border-gray-200 rounded-2xl p-4">
                     <i class="ti ti-shield-lock text-orange-600 text-base mr-1.5 align-middle"></i>
-                    You'll be redirected to the Espees payment portal to complete payment. Your wallet PIN is entered there securely and never captured on this site.
+                    You'll be redirected to the Espees payment portal to complete payment. Your wallet PIN is entered there securely and never captured on this site. When you return, your payment is confirmed automatically.
                 </p>
 
                 <button id="espees-checkout-btn" type="button" class="w-full inline-flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-700 text-white font-semibold px-6 py-3.5 rounded-xl shadow-md hover:shadow-lg transition-all">
