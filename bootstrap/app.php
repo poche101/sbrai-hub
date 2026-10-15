@@ -22,6 +22,13 @@ return Application::configure(basePath: dirname(__DIR__))
         // Trust Nginx proxy headers so CSRF token and HTTPS session cookies pass through
         $middleware->trustProxies(at: '*');
 
+        // Exclude payment webhooks from CSRF verification
+        $middleware->validateCsrfTokens(except: [
+            'paystack/webhook',
+            'api/paystack/webhook',
+            '*webhook*',
+        ]);
+
         // Redirect unauthenticated web users to login
         $middleware->redirectTo('/admin/login');
 
