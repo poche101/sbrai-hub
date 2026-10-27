@@ -43,10 +43,13 @@
                 </div>
 
                 <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                {{-- Every category is rendered here with its listing_type. The script
+                     at the bottom of this file rebuilds the list to show only the
+                     categories that match the selected type. --}}
                 <select id="field-category" class="w-full rounded-md border-gray-300 focus:ring-orange-500 focus:border-orange-500 mb-6">
                     <option value="">Choose a category…</option>
                     @foreach ($categories as $category)
-                        <option value="{{ $category->name }}">{{ $category->name }}</option>
+                        <option value="{{ $category->name }}" data-type="{{ $category->listing_type }}">{{ $category->name }}</option>
                     @endforeach
                 </select>
 
@@ -79,6 +82,8 @@
 
                 <form id="post-ad-form" class="space-y-4">
                     <input type="hidden" id="field-type" name="type" value="product">
+                    {{-- Mirrors the category chosen in step 1 (that select sits outside this form) --}}
+                    <input type="hidden" id="field-category-hidden" name="category" value="">
                     <p id="post-ad-error" class="hidden text-sm text-red-600 bg-red-50 border border-red-200 rounded-md p-2"></p>
 
                     <div>
@@ -146,5 +151,55 @@
 
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const select = document.getElementById('field-category');
+            const hidden = document.getElementById('field-category-hidden');
+            if (!select) return;
+
+            // Snapshot every category (with its type) before we start rebuilding the list.
+            const allCategories = Array.from(select.querySelectorAll('option[data-type]')).map((o) => ({
+                value: o.value,
+                label: o.textContent.trim(),
+                type: o.dataset.type,
+            }));
+
+            // Rebuilding the <select> is more reliable than hiding <option>s, which
+            // Safari and most mobile browsers ignore. A category with no type set
+            // shows under every type so it can't silently disappear.
+            function renderCategories(type) {
+                const previous = select.value;
+                select.innerHTML = '';
+
+                const placeholder = document.createElement('option');
+                placeholder.value = '';
+                placeholder.textContent = 'Choose a category…';
+                select.appendChild(placeholder);
+
+                const visible = allCategories.filter((c) => !c.type || c.type === type);
+                visible.forEach((c) => {
+                    const opt = document.createElement('option');
+                    opt.value = c.value;
+                    opt.textContent = c.label;
+                    select.appendChild(opt);
+                });
+
+                // Keep the previous pick only if it still belongs to this type.
+                if (visible.some((c) => c.value === previous)) select.value = previous;
+                if (hidden) hidden.value = select.value;
+            }
+
+            document.querySelectorAll('[data-type-option]').forEach((btn) => {
+                btn.addEventListener('click', () => renderCategories(btn.dataset.typeOption));
+            });
+
+            select.addEventListener('change', () => {
+                if (hidden) hidden.value = select.value;
+            });
+
+            renderCategories('product'); // "Product" is the default selection
+        });
+    </script>
 
 </x-site-layout>
