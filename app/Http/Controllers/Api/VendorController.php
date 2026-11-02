@@ -8,29 +8,44 @@ use App\Models\Listing;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 
 // ─── Vendor Controller ────────────────────────────────────────────────
 class VendorController extends Controller
 {
+    private const ANALYTICS_DAYS = 14;
+
     public function myListings(Request $request): JsonResponse
     {
-        $listings = $request->user()->listings()
+        $user = $request->user();
+
+        $listings = $user->listings()
             ->orderByDesc('created_at')
             ->paginate(20);
 
         return response()->json([
             'success' => true,
             'data'    => $listings->map(fn($l) => [
-                'id'          => $l->id,
-                'title'       => $l->title,
-                'category'    => $l->category,
-                'price'       => (float) $l->price,
-                'price_unit'  => $l->price_unit,
-                'status'      => $l->status,
-                'view_count'  => $l->view_count,
-                'image_urls'  => $l->image_urls ?? [],
-                'created_at'  => $l->created_at->toISOString(),
+                'id'                   => $l->id,
+                'vendor_id'            => $user->id,
+                'vendor_name'          => $user->full_name,
+                'vendor_business_name' => $user->business_name,
+                'vendor_verified'      => (bool) $user->is_verified,
+                'title'                => $l->title,
+                'description'          => $l->description,
+                'category'             => $l->category,
+                'type'                 => $l->type,
+                'price'                => (float) $l->price,
+                'price_unit'           => $l->price_unit,
+                'status'               => $l->status,
+                'location'             => $l->location,
+                'state'                => $l->state,
+                'view_count'           => (int) $l->view_count,
+                'image_urls'           => $l->image_urls ?? [],
+                'attributes'           => $l->attributes ?? [],
+                'created_at'           => $l->created_at->toISOString(),
             ]),
             'meta' => ['total' => $listings->total()],
         ]);
@@ -42,9 +57,9 @@ class VendorController extends Controller
         return response()->json([
             'success'    => true,
             'stats'      => [
-                'active_listings' => $user->listings()->where('status', 'active')->count(),
-                'total_views'     => $user->listings()->sum('view_count'),
-                'total_chats'     => Chat::where('vendor_id', $user->id)->count(),
+                'active_listings' => (int) $user->listings()->where('status', 'active')->count(),
+                'total_views'     => (int) $user->listings()->sum('view_count'),
+                'total_chats'     => (int) Chat::where('vendor_id', $user->id)->count(),
                 'total_revenue'   => 0, // Implement when payments go live
             ],
             'activities' => [], // Recent activity log
@@ -98,18 +113,67 @@ class VendorController extends Controller
         return response()->json(['success' => true, 'message' => 'Review submitted']);
     }
 
+    // ─── Analytics ────────────────────────────────────────────────────
+    // Last 14 days of views and new chats (zero-filled so charts have a
+    // point for every day), plus the vendor's top listings by views.
+    // Every number is cast so clients never receive "36" for 36.
     public function analytics(Request $request): JsonResponse
     {
-        $user = $request->user();
+        $user  = $request->user();
+        $start = now()->subDays(self::ANALYTICS_DAYS - 1)->toDateString();
+
+        $viewRows = [];
+        if (Schema::hasTable('listing_views')) {
+            $viewRows = DB::table('listing_views')
+                ->join('listings', 'listings.id', '=', 'listing_views.listing_id')
+                ->where('listings.vendor_id', $user->id)
+                ->where('listing_views.date', '>=', $start)
+                ->groupBy('listing_views.date')
+                ->selectRaw('listing_views.date as d, SUM(listing_views.views) as n')
+                ->pluck('n', 'd')
+                ->all();
+        }
+
+        $chatRows = Chat::where('vendor_id', $user->id)
+            ->where('created_at', '>=', $start . ' 00:00:00')
+            ->selectRaw('DATE(created_at) as d, COUNT(*) as n')
+            ->groupBy('d')
+            ->pluck('n', 'd')
+            ->all();
+
+        $topListings = $user->listings()
+            ->orderByDesc('view_count')
+            ->limit(5)
+            ->get()
+            ->map(fn($l) => [
+                'id'        => $l->id,
+                'title'     => $l->title,
+                'status'    => $l->status,
+                'views'     => (int) $l->view_count,
+                'favorites' => (int) $l->favorites()->count(),
+            ])
+            ->values();
+
         return response()->json([
             'success' => true,
             'data'    => [
-                'views_by_day'    => [],
-                'chats_by_day'    => [],
-                'top_listings'    => [],
-                'total_views'     => $user->listings()->sum('view_count'),
-                'active_listings' => $user->listings()->where('status', 'active')->count(),
+                'views_by_day'    => $this->dailySeries($viewRows),
+                'chats_by_day'    => $this->dailySeries($chatRows),
+                'top_listings'    => $topListings,
+                'total_views'     => (int) $user->listings()->sum('view_count'),
+                'active_listings' => (int) $user->listings()->where('status', 'active')->count(),
             ],
         ]);
+    }
+
+    /** @return array<int, array{date: string, count: int}> */
+    private function dailySeries(array $rowsByDate): array
+    {
+        $series = [];
+        for ($i = self::ANALYTICS_DAYS - 1; $i >= 0; $i--) {
+            $date     = now()->subDays($i)->toDateString();
+            $series[] = ['date' => $date, 'count' => (int) ($rowsByDate[$date] ?? 0)];
+        }
+        return $series;
     }
 }

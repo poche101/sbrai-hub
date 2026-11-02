@@ -7,6 +7,8 @@ use App\Models\Listing;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class ListingController extends Controller
@@ -66,6 +68,7 @@ class ListingController extends Controller
     {
         $listing = Listing::with('vendor')->findOrFail($id);
         $listing->increment('view_count');
+        $this->recordDailyView($listing->id);
 
         $isFavorited = false;
         if (auth('sanctum')->check()) {
@@ -77,6 +80,28 @@ class ListingController extends Controller
             'success' => true,
             'listing' => $this->formatListing($listing, $isFavorited ? [$id] : []),
         ]);
+    }
+
+    // Daily view history for the vendor Analytics tab (one row per listing
+    // per day, incremented in place). Analytics must never break a listing
+    // page, so any failure here is logged and swallowed.
+    private function recordDailyView(string $listingId): void
+    {
+        try {
+            DB::table('listing_views')->upsert(
+                [[
+                    'listing_id' => $listingId,
+                    'date'       => now()->toDateString(),
+                    'views'      => 1,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]],
+                ['listing_id', 'date'],
+                ['views' => DB::raw('views + 1'), 'updated_at' => now()]
+            );
+        } catch (\Throwable $e) {
+            Log::warning('listing_views upsert failed: ' . $e->getMessage());
+        }
     }
 
     // ─── Vendor: Store ────────────────────────────────────────────────
@@ -91,6 +116,7 @@ class ListingController extends Controller
             'type'        => 'required|in:product,service,property',
             'location'    => 'required|string|max:255',
             'state'       => 'required|string|max:100',
+            'attributes'  => 'sometimes|nullable|array',
         ]);
 
         $listing = $request->user()->listings()->create([
@@ -104,7 +130,9 @@ class ListingController extends Controller
             'state'       => $request->state,
             'status'      => 'active',
             'image_urls'  => [],
-            'attributes'  => $request->attributes ?? [],
+            // NOTE: $request->attributes is Symfony's request-attribute bag
+            // (never null), not the submitted field — read the input instead.
+            'attributes'  => $request->input('attributes', []) ?? [],
         ]);
 
         $this->notifyInterestedBuyersOfNewListing($listing, $request->user()->id);
