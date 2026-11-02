@@ -391,8 +391,9 @@ class SubscriptionController extends Controller
         string $currency
     ): array {
         return DB::transaction(function () use ($user, $gateway, $reference, $amount, $currency) {
-            // Serialize concurrent activations for the same vendor.
-            User::whereKey($user->id)->lockForUpdate()->first();
+            // Serialize concurrent activations for the same vendor. Keep the
+            // locked row so the voucher check below sees the current balance.
+            $locked = User::whereKey($user->id)->lockForUpdate()->first();
 
             $existing = Subscription::where('transaction_id', $reference)->first();
             if ($existing) {
@@ -452,16 +453,29 @@ class SubscriptionController extends Controller
                 ]);
             }
 
+            // Welcome voucher safety net. Vendors normally receive the ₦5,000
+            // at registration (AuthController), so only grant it here if they
+            // never got one — otherwise the first subscription would stack a
+            // second ₦5,000 on top of the registration grant.
             if ($isFirst) {
-                $user->increment('voucher_balance', self::WELCOME_VOUCHER_NGN);
-                Transaction::create([
-                    'user_id'     => $user->id,
-                    'type'        => 'voucher_credit',
-                    'amount'      => self::WELCOME_VOUCHER_NGN,
-                    'currency'    => 'NGN',
-                    'description' => 'Welcome bonus - Sign up voucher',
-                    'status'      => 'completed',
-                ]);
+                $alreadyGranted = Transaction::where('user_id', $user->id)
+                    ->whereIn('type', ['credit', 'voucher_credit'])
+                    ->where('description', 'like', 'Welcome bonus%')
+                    ->exists();
+
+                $currentBalance = (float) ($locked->voucher_balance ?? 0);
+
+                if (!$alreadyGranted && $currentBalance < self::WELCOME_VOUCHER_NGN) {
+                    $user->increment('voucher_balance', self::WELCOME_VOUCHER_NGN);
+                    Transaction::create([
+                        'user_id'     => $user->id,
+                        'type'        => 'voucher_credit',
+                        'amount'      => self::WELCOME_VOUCHER_NGN,
+                        'currency'    => 'NGN',
+                        'description' => 'Welcome bonus - Sign up voucher',
+                        'status'      => 'completed',
+                    ]);
+                }
             }
 
             return [$subscription, true];
