@@ -329,6 +329,9 @@ class AuthController extends Controller
     }
 
     // ─── Upload Avatar ────────────────────────────────────────────────
+    // Returns the full user (same shape as login and /auth/me, including
+    // `role`) as well as `avatar_url`. A partial response here used to be
+    // parsed by the app as a whole user, which dropped the role.
     public function uploadAvatar(Request $request): JsonResponse
     {
         $request->validate(['avatar' => 'required|image|max:5120']);
@@ -342,10 +345,12 @@ class AuthController extends Controller
 
         $path = $request->file('avatar')->store('avatars', 'public');
         $user->update(['avatar_url' => '/storage/' . $path]);
+        $user->load('activeSubscription');
 
         return response()->json([
             'success'    => true,
             'avatar_url' => $user->avatar_url,
+            'user'       => $this->formatUser($user),
         ]);
     }
 
