@@ -7,9 +7,11 @@ use App\Models\Listing;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class ListingController extends Controller
 {
@@ -231,20 +233,54 @@ class ListingController extends Controller
     }
 
     // ─── Upload Images ────────────────────────────────────────────────
+    // Photos should arrive as `images[]` (an array). Some clients send
+    // repeated `images` fields WITHOUT brackets (Dio 5's default for lists
+    // of files); PHP then keeps only the last one as a single UploadedFile,
+    // and the old `foreach` over it saved nothing while still answering 200.
+    // Both shapes are normalised to an array here, and the endpoint answers
+    // 422 whenever nothing was actually saved, so a failed upload can never
+    // look like a successful one.
     public function uploadImages(Request $request, string $id): JsonResponse
     {
-        $request->validate(['images.*' => 'required|image|max:5120']);
-
         $listing = $request->user()->listings()->findOrFail($id);
-        $urls = $listing->image_urls ?? [];
 
-        foreach ($request->file('images', []) as $image) {
-            $path = $image->store("listings/{$id}", 'public');
+        $received = $request->file('images') ?? $request->file('image');
+        if ($received instanceof UploadedFile) {
+            $received = [$received];
+        }
+
+        $files = array_values(array_filter(
+            is_array($received) ? $received : [],
+            fn ($f) => $f instanceof UploadedFile
+        ));
+
+        if (empty($files)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No image files were received. Send the photos as images[] and check the server upload size limits.',
+            ], 422);
+        }
+
+        Validator::make(['images' => $files], [
+            'images'   => 'required|array|min:1',
+            'images.*' => 'required|image|max:5120',
+        ])->validate();
+
+        $urls  = $listing->image_urls ?? [];
+        $slots = max(0, 5 - count($urls)); // max 5 images per listing
+
+        if ($slots === 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This listing already has the maximum of 5 photos.',
+            ], 422);
+        }
+
+        foreach (array_slice($files, 0, $slots) as $image) {
+            $path   = $image->store("listings/{$id}", 'public');
             $urls[] = '/storage/' . $path;
         }
 
-        // Max 5 images per listing
-        $urls = array_slice($urls, 0, 5);
         $listing->update(['image_urls' => $urls]);
 
         return response()->json([
